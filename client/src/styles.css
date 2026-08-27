@@ -60,6 +60,27 @@
   .keyboard-open .shooting-targets .clay small{display:block;left:50%;top:4px;font-size:3px}
   .keyboard-open .shooting-targets .clay span{display:none}
   .keyboard-open .shooting-targets .clay:last-child{grid-column:auto}
-  .keyboard-open .range-gun{display:none}
+  .keyboard-open .range-gun{display:block;bottom:3px;transform:translateX(-50%) scale(.62);transform-origin:bottom center}
 }
 @keyframes plate-flight-mobile{from{transform:translate3d(0,0,0)}to{transform:translate3d(calc(100vw + 290px),0,0)}}
+
+/* Clay target silhouette and hit feedback */
+.shooting-targets .clay{isolation:isolate;overflow:visible;background:radial-gradient(ellipse at 50% 48%,#fff3fa 0 7%,#ff8cc7 8% 18%,#9d3b91 19% 32%,#251348 33% 52%,#ff4aa9 53% 63%,#5b236f 64% 72%,#180c32 73% 100%);border:3px solid #ff8ac7;box-shadow:inset 0 -7px 0 #531958,inset 0 0 0 3px #321653,0 0 18px #ff3ca677,5px 6px 0 #080516}
+.shooting-targets .clay:before{content:"";z-index:-1;inset:7px 12px;border:2px solid #f79bd0;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 3px #5b267a}
+.shooting-targets .clay:after{content:"";display:block;position:absolute;left:50%;top:50%;width:16px;height:9px;transform:translate(-50%,-50%);border-radius:50%;background:#ffd8ed;box-shadow:0 0 0 4px #802b7c,0 0 12px #fff}
+.shooting-targets .clay small,.shooting-targets .clay strong{z-index:2;text-shadow:0 2px 2px #12051b,1px 0 #12051b,-1px 0 #12051b}
+.shooting-targets .clay.bursting{border-color:#fff4a8;filter:brightness(1.8);box-shadow:0 0 34px #fff,0 0 58px #ffcf3f}
+.shooting-targets .clay.bursting>small,.shooting-targets .clay.bursting>strong{animation:plate-label-hit .42s ease-out forwards}
+.shooting-targets .clay.bursting:after{animation:plate-impact .42s ease-out forwards;background:#fff}
+.shooting-targets .clay .pixel-burst{z-index:8}
+.shooting-targets .clay .pixel-burst i{width:17px;height:11px;border:2px solid #ff9acd;background:#7c2a7d;clip-path:polygon(0 0,100% 18%,72% 100%,13% 72%);box-shadow:0 0 10px #ff5bb7;animation:plate-shard .52s cubic-bezier(.15,.72,.25,1) forwards}
+.shooting-targets .clay .pixel-burst i:nth-child(3n+2){background:#ff4aa9;border-color:#ffd0e9}.shooting-targets .clay .pixel-burst i:nth-child(3n){background:#2d1757;border-color:#b568c7}
+.range-gun.firing{animation:gun-recoil .22s ease-out}
+.range-gun.firing i{background:#fff;box-shadow:0 -18px 10px 5px #ffe342,0 -32px 18px 8px #ff6d32}
+.range-gun.firing:after{content:"";position:absolute;left:50%;top:-38px;width:32px;height:32px;transform:translateX(-50%);background:radial-gradient(circle,#fff 0 12%,#ffe342 13% 32%,#ff6536 33% 48%,transparent 50%);animation:muzzle-flash .22s ease-out forwards}
+@keyframes plate-impact{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(5)}}
+@keyframes plate-label-hit{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.35)}}
+@keyframes plate-shard{0%{opacity:1;transform:rotate(var(--angle)) translateX(4px) rotate(0) scale(1)}100%{opacity:0;transform:rotate(var(--angle)) translateX(105px) rotate(240deg) scale(.35)}}
+@keyframes gun-recoil{0%,100%{margin-bottom:0}35%{margin-bottom:-7px}}
+@keyframes muzzle-flash{0%{opacity:1;transform:translateX(-50%) scale(.5)}100%{opacity:0;transform:translateX(-50%) scale(1.8)}}
+@media(max-width:850px){.keyboard-open .shooting-targets .clay{box-shadow:inset 0 -5px 0 #531958,inset 0 0 0 2px #321653,0 0 13px #ff3ca666,3px 4px 0 #080516}.keyboard-open .shooting-targets .clay:before{inset:5px 9px}.keyboard-open .shooting-targets .clay .pixel-burst i{width:13px;height:9px}.keyboard-open .shooting-targets .clay.bursting{box-shadow:0 0 24px #fff,0 0 42px #ffcf3f}}

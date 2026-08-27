@@ -2,7 +2,7 @@ export type ArcadeSound = 'success' | 'miss' | 'claimed'
 
 let context: AudioContext | null = null
 
-export function playArcadeSound(kind: ArcadeSound, enabled: boolean): void {
+export function playArcadeSound(kind: ArcadeSound, enabled: boolean, shooting = false): void {
   if (!enabled || typeof AudioContext === 'undefined') return
   context ??= new AudioContext()
   const now = context.currentTime
@@ -26,4 +26,22 @@ export function playArcadeSound(kind: ArcadeSound, enabled: boolean): void {
     oscillator.start(now + index * 0.055)
     oscillator.stop(now + 0.2 + index * 0.06)
   })
+
+  if (shooting && kind === 'success') {
+    const sampleRate = context.sampleRate
+    const buffer = context.createBuffer(1, Math.floor(sampleRate * 0.11), sampleRate)
+    const channel = buffer.getChannelData(0)
+    for (let index = 0; index < channel.length; index += 1) {
+      const decay = 1 - index / channel.length
+      channel[index] = (Math.random() * 2 - 1) * decay * decay
+    }
+    const shot = context.createBufferSource()
+    const shotGain = context.createGain()
+    shot.buffer = buffer
+    shotGain.gain.setValueAtTime(0.55, now)
+    shotGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11)
+    shot.connect(shotGain)
+    shotGain.connect(master)
+    shot.start(now)
+  }
 }

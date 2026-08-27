@@ -39,7 +39,7 @@ function App() {
   const viewportBaselineRef = useRef(0)
 
   const triggerFeedback = useCallback((kind: ArcadeSound, targetId?: string) => {
-    playArcadeSound(kind, soundEnabled)
+    playArcadeSound(kind, soundEnabled, gameMode === 'shoot')
     setInputFeedback(kind)
     if (kind === 'success' && targetId) {
       const index = state.targets.findIndex(target => target.id === targetId)
@@ -47,7 +47,7 @@ function App() {
     }
     window.setTimeout(() => setInputFeedback(null), reduced ? 120 : 360)
     window.setTimeout(() => setBurstIndex(null), reduced ? 120 : 520)
-  }, [reduced, soundEnabled, state.targets])
+  }, [gameMode, reduced, soundEnabled, state.targets])
 
   const onServerMessage = useCallback((message: ServerMessage) => {
     if (message.type === 'connected') {
@@ -263,7 +263,7 @@ function App() {
       <section className={`arena ${gameMode === 'shoot' ? 'shooting-arena' : ''}`}>
         <p className="arena-label">{gameMode === 'shoot' ? 'TRACK · TYPE · SHOOT!' : 'TYPE ONE & PRESS ENTER'}</p>
         <div className={`targets ${gameMode === 'shoot' ? 'shooting-targets' : ''}`}>{state.targets.map((target, i) => <article key={target.id} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i} ${gameMode === 'shoot' ? `clay plate-${i}` : ''}`}><small>{target.points ?? 100} PTS</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : 'LOCK ON'}</span>{burstIndex === i && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>)}</div>
-        {gameMode === 'shoot' && <div className="range-gun" aria-hidden="true"><i /><b>TYPE</b></div>}
+        {gameMode === 'shoot' && <div className={`range-gun ${burstIndex !== null ? 'firing' : ''}`} aria-hidden="true"><i /><b>TYPE</b></div>}
         <form className={`type-form ${inputFeedback ? `is-${inputFeedback}` : ''}`} onSubmit={submit}><div className="prompt">›</div><input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="단어를 입력하세요" autoComplete="off" autoCapitalize="none" enterKeyHint="send" spellCheck={false} aria-label="단어 입력" /><button>ENTER ↵</button></form>
         <p className="tip">화면의 단어를 정확히 입력하고 ENTER! 가장 먼저 보낸 사람이 점수를 얻어요.</p>
       </section>
