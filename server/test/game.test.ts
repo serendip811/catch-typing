@@ -16,6 +16,28 @@ function fixture(durationMs = 60_000) {
 }
 
 describe("GameEngine", () => {
+  it("stores the selected game mode and lets only the host change it in the lobby", () => {
+    const engine = new GameEngine({ idFactory: () => "ROOM01" });
+    const room = engine.createRoom("host", "방장", "shoot");
+    engine.joinRoom(room.id, "guest", "손님");
+    assert.equal(room.mode, "shoot");
+    assert.throws(() => engine.setMode(room.id, "guest", "grab"), /HOST_ONLY/);
+    assert.equal(engine.setMode(room.id, "host", "grab").mode, "grab");
+    engine.startMatch(room.id, "host");
+    assert.throws(() => engine.setMode(room.id, "host", "shoot"), /INVALID_ROOM_STATE/);
+  });
+
+  it("lists only joinable lobby rooms with their mode and player count", () => {
+    let sequence = 0;
+    const engine = new GameEngine({ idFactory: () => `ROOM0${++sequence}`, maxPlayers: 2, minPlayers: 1 });
+    const shoot = engine.createRoom("p1", "슈터", "shoot");
+    const playing = engine.createRoom("p2", "캐처", "grab");
+    engine.startMatch(playing.id, "p2");
+    assert.deepEqual(engine.listRooms(), [{ id: shoot.id, mode: "shoot", status: "lobby", playerCount: 1, maxPlayers: 2, hostName: "슈터" }]);
+    engine.joinRoom(shoot.id, "p3", "손님");
+    assert.deepEqual(engine.listRooms(), []);
+  });
+
   it("creates three to five shared targets and a 60 second match", () => {
     const { started } = fixture();
     assert.equal(started.targets.length, 3);

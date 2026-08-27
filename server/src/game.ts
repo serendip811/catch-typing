@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import { randomBytes } from "node:crypto";
 import { KOREAN_TARGETS } from "./words.js";
-import type { PlayerState, PublicRoom, ServerEvent, SubmissionOutcome, Target } from "./types.js";
+import type { GameMode, PlayerState, PublicRoom, RoomSummary, ServerEvent, SubmissionOutcome, Target } from "./types.js";
 
 interface InternalRoom extends PublicRoom {
   claimedTargetIds: Set<string>;
@@ -44,16 +44,26 @@ export class GameEngine extends EventEmitter {
     if (this.words.length === 0) throw new Error("At least one target word is required");
   }
 
-  createRoom(playerId: string, name: string): PublicRoom {
+  createRoom(playerId: string, name: string, mode: GameMode = "grab"): PublicRoom {
     let id = this.idFactory();
     while (this.rooms.has(id)) id = this.idFactory();
     const room: InternalRoom = {
-      id, hostId: playerId, status: "lobby", durationMs: this.durationMs, endsAt: null,
+      id, hostId: playerId, mode, status: "lobby", durationMs: this.durationMs, endsAt: null,
       targets: [], players: [this.newPlayer(playerId, name)], claimedTargetIds: new Set(), targetSequence: 0
     };
     this.rooms.set(id, room);
     this.broadcast(room, { type: "room_state", room: this.publicRoom(room) });
     return this.publicRoom(room);
+  }
+
+  setMode(roomId: string, playerId: string, mode: GameMode): PublicRoom {
+    const room = this.requireRoom(roomId);
+    if (room.hostId !== playerId) throw new Error("HOST_ONLY");
+    if (room.status !== "lobby") throw new Error("INVALID_ROOM_STATE");
+    room.mode = mode;
+    const publicRoom = this.publicRoom(room);
+    this.broadcast(room, { type: "room_state", room: publicRoom });
+    return publicRoom;
   }
 
   joinRoom(roomId: string, playerId: string, name: string): PublicRoom {
@@ -161,6 +171,19 @@ export class GameEngine extends EventEmitter {
     return room && this.publicRoom(room);
   }
 
+  listRooms(): RoomSummary[] {
+    return [...this.rooms.values()]
+      .filter((room) => room.status === "lobby" && room.players.length < this.maxPlayers)
+      .map((room) => ({
+        id: room.id,
+        mode: room.mode,
+        status: room.status,
+        playerCount: room.players.length,
+        maxPlayers: this.maxPlayers,
+        hostName: room.players.find((player) => player.id === room.hostId)?.name ?? "Player"
+      }));
+  }
+
   private emitInterference(room: InternalRoom, source: PlayerState): void {
     const opponents = room.players.filter((player) => player.id !== source.id);
     if (opponents.length === 0) return;
@@ -199,7 +222,7 @@ export class GameEngine extends EventEmitter {
 
   private publicRoom(room: InternalRoom): PublicRoom {
     return {
-      id: room.id, hostId: room.hostId, status: room.status, durationMs: room.durationMs,
+      id: room.id, hostId: room.hostId, mode: room.mode, status: room.status, durationMs: room.durationMs,
       endsAt: room.endsAt, targets: room.targets.map((target) => ({ ...target })),
       players: room.players.map((player) => ({ ...player }))
     };

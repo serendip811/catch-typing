@@ -1,17 +1,16 @@
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { ClientMessage, MatchState, ServerMessage, Target } from './protocol'
+import type { ClientMessage, GameMode, MatchState, RoomSummary, ServerMessage, Target } from './protocol'
 import { fromPublicRoom } from './protocol'
 import { useGameSocket } from './useGameSocket'
 import { playArcadeSound, type ArcadeSound } from './arcadeAudio'
 
 type Screen = 'home' | 'lobby' | 'game' | 'result'
-type GameMode = 'grab' | 'shoot'
 type Toast = { text: string; tone: 'good' | 'bad' | 'info' }
 type InputFeedback = ArcadeSound | null
 const WORDS = ['번개', '스테이지', '콤보', '네온사인', '하이스코어', '동전', '보너스', '아케이드', '도전', '승부', '픽셀', '출발']
 const starterTargets = (): Target[] => WORDS.slice(0, 5).map((text, i) => ({ id: `demo-${i}-${Date.now()}`, text, points: 100 + i * 20 }))
 const roomFromUrl = () => new URLSearchParams(window.location.search).get('room')?.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) ?? ''
-const emptyRoom = (): MatchState => ({ roomCode: '', phase: 'lobby', targets: [], players: [] })
+const emptyRoom = (): MatchState => ({ roomCode: '', mode: 'grab', phase: 'lobby', targets: [], players: [] })
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home')
@@ -32,6 +31,8 @@ function App() {
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('soundEnabled') !== 'false')
   const [demo, setDemo] = useState(false)
   const [gameMode, setGameMode] = useState<GameMode>('grab')
+  const [selectedMode, setSelectedMode] = useState<GameMode>('grab')
+  const [rooms, setRooms] = useState<RoomSummary[]>([])
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const nicknameRef = useRef<HTMLInputElement>(null)
@@ -52,6 +53,8 @@ function App() {
   const onServerMessage = useCallback((message: ServerMessage) => {
     if (message.type === 'connected') {
       setPlayerId(message.playerId)
+    } else if (message.type === 'room_list') {
+      setRooms(message.rooms)
     } else if (message.type === 'room_left') {
       setState(emptyRoom())
       setScreen('home')
@@ -59,6 +62,8 @@ function App() {
       const roomMessage = message as Extract<ServerMessage, { room: unknown }>
       const next = fromPublicRoom(roomMessage.room)
       setState(next)
+      setGameMode(next.mode)
+      setSelectedMode(next.mode)
       setExpiredRoomCode('')
       setScreen(next.phase === 'playing' ? 'game' : next.phase === 'finished' ? 'result' : 'lobby')
       if (next.phase === 'playing') window.setTimeout(() => inputRef.current?.focus(), 50)
@@ -93,6 +98,12 @@ function App() {
   useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(null), 900); return () => clearTimeout(id) }, [toast])
   useEffect(() => { localStorage.setItem('reducedEffects', String(reduced)) }, [reduced])
   useEffect(() => { localStorage.setItem('soundEnabled', String(soundEnabled)) }, [soundEnabled])
+  useEffect(() => {
+    if (screen !== 'home' || demo || status === 'connecting' || status === 'online') return
+    const delay = status === 'offline' ? 2500 : 0
+    const id = window.setTimeout(() => connect(), delay)
+    return () => window.clearTimeout(id)
+  }, [connect, demo, screen, status])
   useEffect(() => {
     if (screen !== 'game' || !window.visualViewport) {
       setKeyboardOpen(false)
@@ -138,13 +149,18 @@ function App() {
     if (!nickname.trim()) { setNicknameRequired(true); setToast({ text: 'STEP 1 · 닉네임을 먼저 입력해 주세요', tone: 'bad' }); nicknameRef.current?.focus(); return }
     if (mode === 'join' && roomInput.trim().length < 4) { setToast({ text: '방 코드를 확인해 주세요', tone: 'bad' }); return }
     setExpiredRoomCode('')
-    setGameMode('grab')
     pendingRoomRef.current = mode === 'join' ? roomInput.trim().toUpperCase() : ''
-    const message: ClientMessage = mode === 'create' ? { type: 'create_room', name: nickname.trim() } : { type: 'join_room', name: nickname.trim(), roomId: roomInput.trim().toUpperCase() }
-    connect(message)
+    const message: ClientMessage = mode === 'create' ? { type: 'create_room', name: nickname.trim(), mode: selectedMode } : { type: 'join_room', name: nickname.trim(), roomId: roomInput.trim().toUpperCase() }
+    if (!send(message)) connect(message)
+  }
+  const joinListedRoom = (room: RoomSummary) => {
+    if (!nickname.trim()) { setNicknameRequired(true); setToast({ text: '닉네임을 먼저 입력해 주세요', tone: 'bad' }); nicknameRef.current?.focus(); return }
+    setRoomInput(room.id); setSelectedMode(room.mode); pendingRoomRef.current = room.id
+    const message: ClientMessage = { type: 'join_room', name: nickname.trim(), roomId: room.id }
+    if (!send(message)) connect(message)
   }
   const startDemo = (mode: GameMode = 'grab') => {
-    setGameMode(mode); setDemo(true); setPlayerId('me'); setState({ roomCode: mode === 'shoot' ? 'RANGE' : 'PIXEL', phase: 'lobby', targets: [], players: [{ id: 'me', nickname: nickname.trim() || 'PLAYER 1', score: 0, combo: 0 }, { id: 'bot', nickname: 'TURBO.K', score: 0, combo: 0 }] }); setScreen('lobby')
+    setGameMode(mode); setDemo(true); setPlayerId('me'); setState({ roomCode: mode === 'shoot' ? 'RANGE' : 'PIXEL', mode, phase: 'lobby', targets: [], players: [{ id: 'me', nickname: nickname.trim() || 'PLAYER 1', score: 0, combo: 0 }, { id: 'bot', nickname: 'TURBO.K', score: 0, combo: 0 }] }); setScreen('lobby')
   }
   const leaveInvite = () => {
     setInviteRoomCode(''); setRoomInput(''); setExpiredRoomCode(''); setNicknameRequired(false)
@@ -177,6 +193,10 @@ function App() {
       return
     }
     const now = Date.now(); setSeconds(60); setState(s => ({ ...s, phase: 'playing', targets: starterTargets(), endsAt: now + 60000, durationMs: 60000 })); setScreen('game'); window.setTimeout(() => inputRef.current?.focus(), 50)
+  }
+  const chooseLobbyMode = (mode: GameMode) => {
+    if (demo) { setGameMode(mode); setState(s => ({ ...s, mode })); return }
+    if (state.hostId === playerId) send({ type: 'set_mode', mode })
   }
   const returnToLobby = () => {
     if (!demo) {
@@ -236,9 +256,11 @@ function App() {
             <button className="primary invite-join" aria-disabled={!hasNickname} onClick={() => enterRoom('join')}>닉네임으로 바로 참가 <kbd>↵</kbd></button>
           </section> : <section className={`setup-step play-step ${hasNickname ? '' : 'locked'}`} aria-labelledby="play-step-title">
             <div className="step-heading"><span>2</span><div><strong id="play-step-title">플레이 방법 선택</strong><small>{hasNickname ? '새 방을 만들거나 기존 방에 참가하세요' : '닉네임 입력 후 선택할 수 있어요'}</small></div></div>
-            <button className="primary" aria-disabled={!hasNickname} onClick={() => enterRoom('create')}>새 게임 만들기 <kbd>↵</kbd></button>
+            <div className="game-picker" aria-label="게임 선택"><button className={selectedMode === 'grab' ? 'selected' : ''} onClick={() => setSelectedMode('grab')}><i>01</i><strong>단어 쟁탈전</strong><small>고정된 단어를 먼저 선점</small></button><button className={selectedMode === 'shoot' ? 'selected' : ''} onClick={() => setSelectedMode('shoot')}><i>02</i><strong>접시 사격</strong><small>움직이는 접시를 타이핑으로 격추</small></button></div>
+            <button className="primary" aria-disabled={!hasNickname} onClick={() => enterRoom('create')}>{selectedMode === 'shoot' ? '접시 사격' : '단어 쟁탈전'} 방 만들기 <kbd>↵</kbd></button>
             <div className="divider"><span>또는 기존 방 참가</span></div>
             <label>방 코드<div className="join-row"><input maxLength={6} value={roomInput} onChange={e => { setRoomInput(e.target.value.toUpperCase()); setExpiredRoomCode('') }} onClick={() => { if (!hasNickname) { setNicknameRequired(true); nicknameRef.current?.focus() } }} readOnly={!hasNickname} aria-disabled={!hasNickname} placeholder={hasNickname ? '예: PIXEL' : '닉네임 입력 후 활성화'} /><button aria-disabled={!hasNickname} onClick={() => enterRoom('join')}>참가하기</button></div></label>
+            <div className="room-browser"><div className="room-browser-head"><strong>공개 대기실</strong><button onClick={() => send({ type: 'list_rooms' })}>↻ 새로고침</button></div>{rooms.length === 0 ? <p>현재 참가 가능한 방이 없어요.</p> : rooms.map(room => <button className="room-list-item" key={room.id} onClick={() => joinListedRoom(room)}><span className={`mode-badge ${room.mode}`}>{room.mode === 'shoot' ? 'SHOOT' : 'CATCH'}</span><span><b>{room.mode === 'shoot' ? '접시 사격' : '단어 쟁탈전'}</b><small>{room.hostName}의 방 · {room.id}</small></span><em>{room.playerCount}/{room.maxPlayers} 참가</em></button>)}</div>
           </section>}
           {inviteRoomCode ? <button className="demo-link" onClick={leaveInvite}>다른 방법으로 시작하기 →</button> : <div className="demo-actions"><button className="demo-link" onClick={() => startDemo('grab')}>단어 쟁탈 연습 →</button><button className="demo-link shoot-link" onClick={() => startDemo('shoot')}>접시 사격 테스트 →</button></div>}
         </div>
@@ -253,6 +275,7 @@ function App() {
         <div><small>ROOM CODE</small><button className="room-code" onClick={() => navigator.clipboard?.writeText(state.roomCode)}>{state.roomCode} <span>⧉</span></button><button className="invite-link" onClick={copyInviteLink}>⌁ 초대 링크 복사</button><p>친구는 링크를 열고 닉네임만 입력하면 참가할 수 있어요.</p></div>
         <div className={`connection ${demo ? 'demo' : status}`}>● {demo ? '연습 모드' : status === 'online' ? '서버 연결됨' : '연결 확인 중'}</div>
       </section>
+      <section className="lobby-mode"><div><small>SELECTED GAME</small><strong>{gameMode === 'shoot' ? '접시 사격' : '단어 쟁탈전'}</strong><span>{state.hostId === playerId || demo ? '방장은 시작 전까지 변경할 수 있어요' : '방장이 선택한 게임으로 진행해요'}</span></div><div className="lobby-mode-buttons"><button className={gameMode === 'grab' ? 'selected' : ''} disabled={!demo && state.hostId !== playerId} onClick={() => chooseLobbyMode('grab')}>01 CATCH</button><button className={gameMode === 'shoot' ? 'selected' : ''} disabled={!demo && state.hostId !== playerId} onClick={() => chooseLobbyMode('shoot')}>02 SHOOT</button></div></section>
       <section className="players"><div className="section-title"><h2>PLAYERS</h2><span>{state.players.length} / 5</span></div>{state.players.map((p, i) => <div className="player-slot" key={p.id}><strong>P{i + 1}</strong><div className={`avatar a${i + 1}`}>{p.nickname.charAt(0)}</div><span>{p.nickname}</span><i>READY</i></div>)}{Array.from({ length: Math.max(0, 5 - state.players.length) }, (_, i) => <div className="player-slot empty" key={i}><strong>?</strong><div className="avatar">+</div><span>친구를 기다리는 중...</span><i>WAIT</i></div>)}</section>
       <div className="lobby-actions"><button className="ghost" onClick={exitRoom}>← 나가기</button>{demo || state.hostId === playerId ? <button className="primary big" onClick={startGame}>게임 시작 <span>READY?</span></button> : <div className="waiting-host" role="status">방장이 게임을 시작하기를 기다리는 중…</div>}</div>
     </main>}

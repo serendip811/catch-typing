@@ -1,8 +1,10 @@
 export type Player = { id: string; nickname: string; score: number; combo: number; connected?: boolean }
 export type Target = { id: string; text: string; points?: number }
+export type GameMode = 'grab' | 'shoot'
 export type MatchState = {
   roomCode: string
   hostId?: string
+  mode: GameMode
   phase: 'lobby' | 'playing' | 'finished'
   targets: Target[]
   players: Player[]
@@ -11,14 +13,18 @@ export type MatchState = {
 }
 
 export type PublicRoom = {
-  id: string; hostId: string; status: MatchState['phase']; durationMs: number; endsAt: number | null
+  id: string; hostId: string; mode: GameMode; status: MatchState['phase']; durationMs: number; endsAt: number | null
   targets: Array<{ id: string; text: string }>
   players: Array<{ id: string; name: string; score: number; combo: number }>
 }
 
+export type RoomSummary = { id: string; mode: GameMode; status: MatchState['phase']; playerCount: number; maxPlayers: number; hostName: string }
+
 export type ClientMessage =
-  | { type: 'create_room'; name: string }
+  | { type: 'create_room'; name: string; mode: GameMode }
   | { type: 'join_room'; name: string; roomId: string }
+  | { type: 'list_rooms' }
+  | { type: 'set_mode'; mode: GameMode }
   | { type: 'leave_room' }
   | { type: 'start_match' }
   | { type: 'return_to_lobby' }
@@ -26,6 +32,7 @@ export type ClientMessage =
 
 export type ServerMessage =
   | { type: 'connected'; playerId: string }
+  | { type: 'room_list'; rooms: RoomSummary[] }
   | { type: 'room_left' }
   | { type: 'room_created' | 'room_joined' | 'room_state' | 'match_started' | 'match_ended'; room: PublicRoom }
   | { type: 'submission_result'; playerId: string; targetId: string; outcome: 'success' | 'claimed' | 'miss'; scoreDelta: number; combo: number; replacement?: { id: string; text: string } }
@@ -35,6 +42,7 @@ export type ServerMessage =
 export const fromPublicRoom = (room: PublicRoom): MatchState => ({
   roomCode: room.id,
   hostId: room.hostId,
+  mode: room.mode,
   phase: room.status,
   durationMs: room.durationMs,
   endsAt: room.endsAt ?? undefined,

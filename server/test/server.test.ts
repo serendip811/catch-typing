@@ -40,6 +40,27 @@ function close(socket: WebSocket): Promise<void> {
 }
 
 describe("WebSocket room lifecycle", () => {
+  it("publishes selectable game modes in the public room list", async () => {
+    const engine = new GameEngine({ idFactory: () => "ROOM01" });
+    const server = createGameServer(0, engine);
+    await new Promise<void>((resolve) => server.once("listening", resolve));
+    const address = server.address();
+    assert.ok(address && typeof address === "object");
+    const url = `ws://127.0.0.1:${address.port}`;
+    const observer = await connect(url);
+    const host = await connect(url);
+    const listed = waitForMessage(observer, (message) => message.type === "room_list" && (message.rooms as unknown[]).length === 1);
+    const created = waitForMessage(host, (message) => message.type === "room_created");
+    host.send(JSON.stringify({ type: "create_room", name: "슈터", mode: "shoot" }));
+    const [listMessage, createdMessage] = await Promise.all([listed, created]);
+    assert.equal((createdMessage.room as { mode: string }).mode, "shoot");
+    assert.deepEqual((listMessage.rooms as Array<{ id: string; mode: string; playerCount: number }>).map(({ id, mode, playerCount }) => ({ id, mode, playerCount })), [{ id: "ROOM01", mode: "shoot", playerCount: 1 }]);
+
+    await close(host);
+    await close(observer);
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+
   it("returns ROOM_NOT_FOUND when an invitation points to a deleted room", async () => {
     const server = createGameServer(0, new GameEngine());
     await new Promise<void>((resolve) => server.once("listening", resolve));
