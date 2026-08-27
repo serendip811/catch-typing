@@ -22,3 +22,34 @@
 .invite-step.locked{opacity:.52}.invite-step.locked .primary{cursor:not-allowed;filter:saturate(.25)}.invited-room{display:flex;align-items:center;justify-content:space-between;border:1px solid #4d3b7d;background:#080616;padding:12px 14px;margin-bottom:12px}.invited-room small{font-family:'Press Start 2P';font-size:7px;color:#82759f}.invited-room b{font-family:'Press Start 2P';font-size:16px;color:var(--yellow);letter-spacing:1px}.invite-join{width:100%;display:flex;justify-content:space-between}.invite-link{display:inline-flex;align-items:center;gap:6px;border:1px solid #664798;background:#2b1b51;color:var(--cyan);font-family:'Noto Sans KR',system-ui,sans-serif;font-weight:700;font-size:11px;padding:8px 11px;margin:0 0 8px;cursor:pointer}.invite-link:hover{border-color:var(--cyan);background:#352268}.room-panel>div:first-child{min-width:250px}
 .expired-room{position:relative;display:flex;flex-direction:column;gap:7px;margin:14px 0 18px;padding:14px 38px 14px 15px;border:1px solid #ff4a83;background:#351329;box-shadow:4px 4px 0 #130714}.expired-room strong{font-family:'Press Start 2P';font-size:8px;color:#ff7da6}.expired-room span{font-size:12px;line-height:1.55;color:#e5c6d4}.expired-room button{position:absolute;right:8px;top:7px;border:0;background:transparent;color:#c89aaa;font-size:19px;cursor:pointer}
 @media(max-width:560px){.invite-link{width:100%;justify-content:center}.room-panel>div:first-child{min-width:0}}
+
+@media(max-width:850px){
+  .keyboard-open{height:var(--visual-viewport-height,100dvh);min-height:0;overflow:hidden}
+  .keyboard-open .topbar,.keyboard-open footer,.keyboard-open .arena-label,.keyboard-open .tip{display:none}
+  .keyboard-open .game{position:fixed;top:var(--visual-viewport-top,0);left:0;right:0;height:var(--visual-viewport-height,100dvh);min-height:0;padding:3px 8px 64px;overflow:hidden;display:grid;grid-template-rows:44px 38px minmax(0,1fr)}
+  .keyboard-open .game-hud{height:44px;padding:0 4px;border-bottom:1px solid #312352}
+  .keyboard-open .game-hud>div:first-child{display:none}
+  .keyboard-open .game-hud{grid-template-columns:1fr 1fr}
+  .keyboard-open .game-hud .timer{align-items:flex-start!important;justify-content:center}
+  .keyboard-open .game-hud>div:last-child{display:flex;align-items:center;justify-content:flex-end}
+  .keyboard-open .game-hud small{font-size:5px;margin:0}
+  .keyboard-open .timer strong{font-size:19px;text-shadow:2px 2px #a61e67}
+  .keyboard-open .combo b{font-size:11px}
+  .keyboard-open .scoreboard{position:static;width:100%;height:38px;display:flex;gap:3px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+  .keyboard-open .scoreboard::-webkit-scrollbar{display:none}
+  .keyboard-open .scoreboard>div{flex:1 0 min(145px,43vw);min-width:0;height:32px;margin:2px 0;padding:6px;grid-template-columns:18px 1fr auto;font-size:9px}
+  .keyboard-open .arena{width:100%;max-width:none;min-height:0;padding:4px 0 0;overflow:hidden}
+  .keyboard-open .targets{height:100%;min-height:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(48px,1fr));gap:6px;align-content:stretch}
+  .keyboard-open .targets article{position:relative;inset:auto!important;min-width:0;width:auto;height:auto;padding:5px 8px;box-shadow:3px 3px 0 #080516;transform:none!important;animation:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .keyboard-open .targets article:last-child{grid-column:1/-1}
+  .keyboard-open .targets article small,.keyboard-open .targets article span{position:absolute;font-size:4px}
+  .keyboard-open .targets article small{left:7px;top:6px}
+  .keyboard-open .targets article span{right:7px;bottom:6px}
+  .keyboard-open .targets article strong{font-size:clamp(15px,4.6vw,20px);padding:5px 0;line-height:1.1}
+  .keyboard-open .type-form{position:fixed;z-index:30;left:8px;right:8px;top:calc(var(--visual-viewport-top,0px) + var(--visual-viewport-height,100dvh) - 58px);width:auto;max-width:none;height:52px;margin:0;box-shadow:0 0 20px #2ce8ff33}
+  .keyboard-open .type-form .prompt{width:34px;font-size:22px}
+  .keyboard-open .type-form input{font-size:16px;padding:0 9px;border-width:2px}
+  .keyboard-open .type-form button{width:68px;font-size:5px}
+  .keyboard-open .toast{top:25%;font-size:14px;white-space:nowrap}
+  .keyboard-open .interference{inset:0;z-index:25}
+}

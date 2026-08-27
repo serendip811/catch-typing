@@ -30,9 +30,11 @@ function App() {
   const [reduced, setReduced] = useState(() => localStorage.getItem('reducedEffects') === 'true')
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('soundEnabled') !== 'false')
   const [demo, setDemo] = useState(false)
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const nicknameRef = useRef<HTMLInputElement>(null)
   const pendingRoomRef = useRef('')
+  const viewportBaselineRef = useRef(0)
 
   const triggerFeedback = useCallback((kind: ArcadeSound, targetId?: string) => {
     playArcadeSound(kind, soundEnabled)
@@ -89,6 +91,37 @@ function App() {
   useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(null), 900); return () => clearTimeout(id) }, [toast])
   useEffect(() => { localStorage.setItem('reducedEffects', String(reduced)) }, [reduced])
   useEffect(() => { localStorage.setItem('soundEnabled', String(soundEnabled)) }, [soundEnabled])
+  useEffect(() => {
+    if (screen !== 'game' || !window.visualViewport) {
+      setKeyboardOpen(false)
+      return
+    }
+    const viewport = window.visualViewport
+    let frame = 0
+    viewportBaselineRef.current = viewport.height
+    const updateViewport = () => {
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        viewportBaselineRef.current = Math.max(viewportBaselineRef.current, viewport.height)
+        const open = viewportBaselineRef.current - viewport.height > 180
+        document.documentElement.style.setProperty('--visual-viewport-height', `${Math.round(viewport.height)}px`)
+        document.documentElement.style.setProperty('--visual-viewport-top', `${Math.round(viewport.offsetTop)}px`)
+        setKeyboardOpen(open)
+        if (open) window.scrollTo({ top: 0, behavior: 'auto' })
+      })
+    }
+    updateViewport()
+    viewport.addEventListener('resize', updateViewport)
+    viewport.addEventListener('scroll', updateViewport)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      viewport.removeEventListener('resize', updateViewport)
+      viewport.removeEventListener('scroll', updateViewport)
+      document.documentElement.style.removeProperty('--visual-viewport-height')
+      document.documentElement.style.removeProperty('--visual-viewport-top')
+      setKeyboardOpen(false)
+    }
+  }, [screen])
   useEffect(() => {
     if (status !== 'offline' || demo || screen === 'home') return
     setToast({ text: '서버 연결이 끊어져 방에서 나왔어요', tone: 'bad' })
@@ -170,7 +203,7 @@ function App() {
   const prefixMatches = (target: Target) => !!input && target.text.startsWith(input)
   const hasNickname = nickname.trim().length > 0
 
-  return <div className={`app ${reduced ? 'reduced' : ''}`}>
+  return <div className={`app ${reduced ? 'reduced' : ''} ${keyboardOpen ? 'keyboard-open' : ''}`}>
     <div className="crt" aria-hidden="true" />
     <header className="topbar">
       <button className="brand" onClick={exitRoom} aria-label="첫 화면으로"><span>CATCH</span> TYPING <i>!</i></button>
@@ -226,7 +259,7 @@ function App() {
       <section className="arena">
         <p className="arena-label">TYPE ONE & PRESS ENTER</p>
         <div className="targets">{state.targets.map((target, i) => <article key={target.id} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i}`}><small>{target.points ?? 100} PTS</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : 'LOCK ON'}</span>{burstIndex === i && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>)}</div>
-        <form className={`type-form ${inputFeedback ? `is-${inputFeedback}` : ''}`} onSubmit={submit}><div className="prompt">›</div><input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="단어를 입력하세요" autoComplete="off" spellCheck={false} aria-label="단어 입력" /><button>ENTER ↵</button></form>
+        <form className={`type-form ${inputFeedback ? `is-${inputFeedback}` : ''}`} onSubmit={submit}><div className="prompt">›</div><input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="단어를 입력하세요" autoComplete="off" autoCapitalize="none" enterKeyHint="send" spellCheck={false} aria-label="단어 입력" /><button>ENTER ↵</button></form>
         <p className="tip">화면의 단어를 정확히 입력하고 ENTER! 가장 먼저 보낸 사람이 점수를 얻어요.</p>
       </section>
       {effect === 'blur' && <div className="interference blurfx"><b>BLUR ATTACK!</b></div>}
