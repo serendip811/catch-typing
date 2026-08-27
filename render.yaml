@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: catch-typing-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    plan: free
+    autoDeploy: true

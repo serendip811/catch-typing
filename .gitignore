@@ -1,0 +1,16 @@
+node_modules/
+client/node_modules/
+server/node_modules/
+client/dist/
+server/dist/
+*.tsbuildinfo
+client/vite.config.js
+client/vite.config.d.ts
+.env
+.env.*
+!.env.example
+.DS_Store
+.playwright-cli/
+work/
+tasks/
+npm-debug.log*
