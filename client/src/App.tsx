@@ -356,8 +356,8 @@ function App() {
     </main>}
 
     {screen === 'result' && <main className="result">
-      <p className="eyebrow">GAME CLEAR</p><h1>{sorted[0]?.id === playerId ? 'YOU WIN!' : 'NICE TRY!'}</h1>
-      <div className="trophy">★</div><h2>{sorted[0]?.nickname}</h2><p className="final-score">{sorted[0]?.score.toLocaleString()} <small>PTS</small></p>
+      <p className="eyebrow">{gameMode === 'zombie' && state.modeState?.baseHealth === 0 ? 'BASE DESTROYED' : 'GAME CLEAR'}</p><h1>{gameMode === 'zombie' ? state.modeState?.baseHealth === 0 ? 'DEFENSE FAILED!' : 'BASE SECURED!' : sorted[0]?.id === playerId ? 'YOU WIN!' : 'NICE TRY!'}</h1>
+      <div className="trophy">{gameMode === 'zombie' && state.modeState?.baseHealth === 0 ? '×' : '★'}</div><h2>{gameMode === 'zombie' ? `TEAM ZAPS ${state.modeState?.teamKills ?? 0}` : sorted[0]?.nickname}</h2><p className="final-score">{sorted[0]?.score.toLocaleString()} <small>PTS</small></p>
       <section className="results-table">{sorted.map((p, i) => <div className={p.id === playerId ? 'mine' : ''} key={p.id}><strong>#{i + 1}</strong><span>{p.nickname}</span><b>{p.score.toLocaleString()}</b><em>MAX ×{p.combo}</em></div>)}</section>
       <div className="result-actions">{demo || state.hostId === playerId ? <><button className="primary" onClick={startGame}>한 판 더!</button><button className="ghost" onClick={returnToLobby}>대기실로</button></> : <><div className="waiting-host" role="status">방장의 선택을 기다리는 중…</div><button className="ghost" onClick={exitRoom}>나가기</button></>}</div>
     </main>}
