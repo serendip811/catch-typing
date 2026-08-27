@@ -6,10 +6,12 @@ import type { ServerEvent } from "./types.js";
 type ClientMessage =
   | { type: "create_room"; name: string }
   | { type: "join_room"; roomId: string; name: string }
+  | { type: "leave_room" }
   | { type: "start_match" }
+  | { type: "return_to_lobby" }
   | { type: "submit"; targetId: string; text: string };
 
-interface Session { id: string; socket: WebSocket; roomId?: string }
+interface Session { id: string; socket: WebSocket; roomId?: string; isAlive: boolean }
 
 export function createGameServer(port = 8080, engine = new GameEngine()): WebSocketServer {
   const wss = new WebSocketServer({ port });
@@ -23,7 +25,7 @@ export function createGameServer(port = 8080, engine = new GameEngine()): WebSoc
   });
 
   wss.on("connection", (socket) => {
-    const session: Session = { id: randomUUID(), socket };
+    const session: Session = { id: randomUUID(), socket, isAlive: true };
     sessions.set(socket, session);
     send(socket, { type: "connected", playerId: session.id });
 
@@ -36,27 +38,55 @@ export function createGameServer(port = 8080, engine = new GameEngine()): WebSoc
         send(socket, { type: "error", code: error instanceof Error ? error.message : "UNKNOWN_ERROR" });
       }
     });
-    socket.on("close", () => sessions.delete(socket));
+    socket.on("pong", () => { session.isAlive = true; });
+    socket.on("error", () => socket.terminate());
+    socket.on("close", () => {
+      leaveCurrentRoom(engine, session);
+      sessions.delete(socket);
+    });
   });
+
+  const heartbeat = setInterval(() => {
+    for (const session of sessions.values()) {
+      if (session.socket.readyState !== session.socket.OPEN) continue;
+      if (!session.isAlive) {
+        session.socket.terminate();
+        continue;
+      }
+      session.isAlive = false;
+      session.socket.ping();
+    }
+  }, 30_000);
+  heartbeat.unref?.();
+  wss.on("close", () => clearInterval(heartbeat));
   return wss;
 }
 
 function handleMessage(engine: GameEngine, session: Session, message: ClientMessage): void {
   switch (message.type) {
     case "create_room": {
+      requireNotInRoom(session);
       const room = engine.createRoom(session.id, requiredString(message.name));
       session.roomId = room.id;
       send(session.socket, { type: "room_created", room });
       break;
     }
     case "join_room": {
+      requireNotInRoom(session);
       const room = engine.joinRoom(requiredString(message.roomId).toUpperCase(), session.id, requiredString(message.name));
       session.roomId = room.id;
       send(session.socket, { type: "room_joined", room });
       break;
     }
+    case "leave_room":
+      leaveCurrentRoom(engine, session);
+      send(session.socket, { type: "room_left" });
+      break;
     case "start_match":
       engine.startMatch(requireRoom(session), session.id);
+      break;
+    case "return_to_lobby":
+      engine.returnToLobby(requireRoom(session), session.id);
       break;
     case "submit":
       engine.submit(requireRoom(session), session.id, requiredString(message.targetId), requiredString(message.text));
@@ -74,6 +104,17 @@ function requiredString(value: unknown): string {
 function requireRoom(session: Session): string {
   if (!session.roomId) throw new Error("NOT_IN_ROOM");
   return session.roomId;
+}
+
+function requireNotInRoom(session: Session): void {
+  if (session.roomId) throw new Error("ALREADY_IN_ROOM");
+}
+
+function leaveCurrentRoom(engine: GameEngine, session: Session): void {
+  if (!session.roomId) return;
+  const roomId = session.roomId;
+  session.roomId = undefined;
+  engine.leaveRoom(roomId, session.id);
 }
 
 function send(socket: WebSocket, value: unknown): void {

@@ -83,4 +83,54 @@ describe("GameEngine", () => {
     engine.joinRoom(room.id, "guest", "손님");
     assert.throws(() => engine.startMatch(room.id, "guest"), /HOST_ONLY/);
   });
+
+  it("transfers host ownership when the host leaves", () => {
+    const engine = new GameEngine({ idFactory: () => "ROOM01" });
+    const room = engine.createRoom("host", "방장");
+    engine.joinRoom(room.id, "guest", "손님");
+    const remaining = engine.leaveRoom(room.id, "host");
+    assert.equal(remaining?.hostId, "guest");
+    assert.deepEqual(remaining?.players.map((player) => player.id), ["guest"]);
+  });
+
+  it("deletes an empty room and clears its match timer", () => {
+    const engine = new GameEngine({ idFactory: () => "ROOM01", minPlayers: 1 });
+    const room = engine.createRoom("host", "방장");
+    engine.startMatch(room.id, "host");
+    assert.equal(engine.leaveRoom(room.id, "host"), undefined);
+    assert.equal(engine.getRoom(room.id), undefined);
+  });
+
+  it("enforces room capacity", () => {
+    const engine = new GameEngine({ idFactory: () => "ROOM01", maxPlayers: 2 });
+    const room = engine.createRoom("p1", "하나");
+    engine.joinRoom(room.id, "p2", "둘");
+    assert.throws(() => engine.joinRoom(room.id, "p3", "셋"), /ROOM_FULL/);
+  });
+
+  it("requires at least two players for a multiplayer match", () => {
+    const engine = new GameEngine({ idFactory: () => "ROOM01" });
+    const room = engine.createRoom("host", "방장");
+    assert.throws(() => engine.startMatch(room.id, "host"), /NOT_ENOUGH_PLAYERS/);
+  });
+
+  it("resets scores and starts a rematch from a finished room", () => {
+    const { engine, started } = fixture();
+    const target = started.targets[0];
+    engine.submit(started.id, "p1", target.id, target.text);
+    engine.endMatch(started.id);
+    const restarted = engine.startMatch(started.id, "p1");
+    assert.equal(restarted.status, "playing");
+    assert.deepEqual(restarted.players.map((player) => player.score), [0, 0]);
+    assert.equal(restarted.targets.length, 3);
+  });
+
+  it("returns a finished room to a clean lobby", () => {
+    const { engine, started } = fixture();
+    engine.endMatch(started.id);
+    const lobby = engine.returnToLobby(started.id, "p1");
+    assert.equal(lobby.status, "lobby");
+    assert.equal(lobby.endsAt, null);
+    assert.deepEqual(lobby.targets, []);
+  });
 });

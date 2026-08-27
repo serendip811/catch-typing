@@ -12,6 +12,8 @@ interface InternalRoom extends PublicRoom {
 export interface GameOptions {
   durationMs?: number;
   targetCount?: number;
+  maxPlayers?: number;
+  minPlayers?: number;
   now?: () => number;
   random?: () => number;
   words?: string[];
@@ -22,6 +24,8 @@ export class GameEngine extends EventEmitter {
   private readonly rooms = new Map<string, InternalRoom>();
   private readonly durationMs: number;
   private readonly targetCount: number;
+  private readonly maxPlayers: number;
+  private readonly minPlayers: number;
   private readonly now: () => number;
   private readonly random: () => number;
   private readonly words: string[];
@@ -31,6 +35,8 @@ export class GameEngine extends EventEmitter {
     super();
     this.durationMs = options.durationMs ?? 60_000;
     this.targetCount = Math.max(3, Math.min(5, options.targetCount ?? 4));
+    this.maxPlayers = Math.max(2, options.maxPlayers ?? 5);
+    this.minPlayers = Math.max(1, Math.min(this.maxPlayers, options.minPlayers ?? 2));
     this.now = options.now ?? Date.now;
     this.random = options.random ?? Math.random;
     this.words = options.words ?? KOREAN_TARGETS;
@@ -53,15 +59,38 @@ export class GameEngine extends EventEmitter {
   joinRoom(roomId: string, playerId: string, name: string): PublicRoom {
     const room = this.requireRoom(roomId);
     if (room.status !== "lobby") throw new Error("MATCH_ALREADY_STARTED");
-    if (!room.players.some((player) => player.id === playerId)) room.players.push(this.newPlayer(playerId, name));
+    if (!room.players.some((player) => player.id === playerId)) {
+      if (room.players.length >= this.maxPlayers) throw new Error("ROOM_FULL");
+      room.players.push(this.newPlayer(playerId, name));
+    }
     this.broadcast(room, { type: "room_state", room: this.publicRoom(room) });
     return this.publicRoom(room);
+  }
+
+  leaveRoom(roomId: string, playerId: string): PublicRoom | undefined {
+    const room = this.rooms.get(roomId.toUpperCase());
+    if (!room) return undefined;
+    const index = room.players.findIndex((player) => player.id === playerId);
+    if (index < 0) return this.publicRoom(room);
+
+    room.players.splice(index, 1);
+    if (room.players.length === 0) {
+      if (room.timer) clearTimeout(room.timer);
+      this.rooms.delete(room.id);
+      return undefined;
+    }
+    if (room.hostId === playerId) room.hostId = room.players[0].id;
+    const publicRoom = this.publicRoom(room);
+    this.broadcast(room, { type: "room_state", room: publicRoom });
+    return publicRoom;
   }
 
   startMatch(roomId: string, playerId: string): PublicRoom {
     const room = this.requireRoom(roomId);
     if (room.hostId !== playerId) throw new Error("HOST_ONLY");
-    if (room.status !== "lobby") throw new Error("INVALID_ROOM_STATE");
+    if (room.status === "playing") throw new Error("INVALID_ROOM_STATE");
+    if (room.players.length < this.minPlayers) throw new Error("NOT_ENOUGH_PLAYERS");
+    if (room.status === "finished") this.resetRoom(room);
     room.status = "playing";
     room.endsAt = this.now() + room.durationMs;
     room.targets = Array.from({ length: this.targetCount }, () => this.nextTarget(room));
@@ -69,6 +98,16 @@ export class GameEngine extends EventEmitter {
     room.timer.unref?.();
     const publicRoom = this.publicRoom(room);
     this.broadcast(room, { type: "match_started", room: publicRoom });
+    return publicRoom;
+  }
+
+  returnToLobby(roomId: string, playerId: string): PublicRoom {
+    const room = this.requireRoom(roomId);
+    if (room.hostId !== playerId) throw new Error("HOST_ONLY");
+    if (room.status === "playing") throw new Error("INVALID_ROOM_STATE");
+    this.resetRoom(room);
+    const publicRoom = this.publicRoom(room);
+    this.broadcast(room, { type: "room_state", room: publicRoom });
     return publicRoom;
   }
 
@@ -137,6 +176,19 @@ export class GameEngine extends EventEmitter {
 
   private newPlayer(id: string, name: string): PlayerState {
     return { id, name: name.trim().slice(0, 16) || "Player", score: 0, combo: 0 };
+  }
+
+  private resetRoom(room: InternalRoom): void {
+    if (room.timer) clearTimeout(room.timer);
+    room.timer = undefined;
+    room.status = "lobby";
+    room.endsAt = null;
+    room.targets = [];
+    room.claimedTargetIds.clear();
+    for (const player of room.players) {
+      player.score = 0;
+      player.combo = 0;
+    }
   }
 
   private requireRoom(roomId: string): InternalRoom {

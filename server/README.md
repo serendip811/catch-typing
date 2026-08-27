@@ -16,10 +16,15 @@ The default endpoint is `ws://localhost:8080` (`PORT` can override it).
 ```json
 {"type":"create_room","name":"하나"}
 {"type":"join_room","roomId":"ABC123","name":"둘"}
+{"type":"leave_room"}
 {"type":"start_match"}
+{"type":"return_to_lobby"}
 {"type":"submit","targetId":"ABC123-1","text":"번개"}
 ```
 
 The server broadcasts authoritative `room_state`, `match_started`,
 `submission_result`, `interference`, and `match_ended` events. Submission results
 are `success`, `claimed` (another player already won that target), or `miss`.
+
+Rooms accept two to five players. A disconnect removes the player, transfers
+host ownership when necessary, and deletes the room when it becomes empty.

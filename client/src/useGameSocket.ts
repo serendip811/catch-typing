@@ -16,17 +16,36 @@ export function useGameSocket(onMessage: (message: ServerMessage) => void) {
     const ws = new WebSocket(configuredWsUrl)
     socket.current = ws
     ws.onopen = () => {
+      if (socket.current !== ws) return
       setStatus('online')
       if (initialMessage) ws.send(JSON.stringify(initialMessage))
     }
-    ws.onclose = () => setStatus('offline')
-    ws.onerror = () => setStatus('offline')
+    ws.onclose = () => {
+      if (socket.current !== ws) return
+      socket.current = null
+      setStatus('offline')
+    }
+    ws.onerror = () => {
+      if (socket.current === ws) setStatus('offline')
+    }
     ws.onmessage = (event) => {
+      if (socket.current !== ws) return
       try { handler.current(JSON.parse(event.data) as ServerMessage) } catch { /* ignore malformed frames */ }
     }
   }, [])
 
-  useEffect(() => () => socket.current?.close(), [])
+  const disconnect = useCallback(() => {
+    const ws = socket.current
+    socket.current = null
+    ws?.close()
+    setStatus('idle')
+  }, [])
+
+  useEffect(() => () => {
+    const ws = socket.current
+    socket.current = null
+    ws?.close()
+  }, [])
 
   const send = useCallback((message: ClientMessage) => {
     if (socket.current?.readyState !== WebSocket.OPEN) return false
@@ -34,5 +53,5 @@ export function useGameSocket(onMessage: (message: ServerMessage) => void) {
     return true
   }, [])
 
-  return { status, connect, send }
+  return { status, connect, disconnect, send }
 }

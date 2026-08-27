@@ -19,11 +19,14 @@ export type PublicRoom = {
 export type ClientMessage =
   | { type: 'create_room'; name: string }
   | { type: 'join_room'; name: string; roomId: string }
+  | { type: 'leave_room' }
   | { type: 'start_match' }
+  | { type: 'return_to_lobby' }
   | { type: 'submit'; targetId: string; text: string }
 
 export type ServerMessage =
   | { type: 'connected'; playerId: string }
+  | { type: 'room_left' }
   | { type: 'room_created' | 'room_joined' | 'room_state' | 'match_started' | 'match_ended'; room: PublicRoom }
   | { type: 'submission_result'; playerId: string; targetId: string; outcome: 'success' | 'claimed' | 'miss'; scoreDelta: number; combo: number; replacement?: { id: string; text: string } }
   | { type: 'interference'; fromPlayerId: string; toPlayerId: string; effect: 'blur' | 'ink'; durationMs: number }
