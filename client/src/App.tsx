@@ -5,6 +5,7 @@ import { useGameSocket } from './useGameSocket'
 import { playArcadeSound, type ArcadeSound } from './arcadeAudio'
 
 type Screen = 'home' | 'lobby' | 'game' | 'result'
+type GameMode = 'grab' | 'shoot'
 type Toast = { text: string; tone: 'good' | 'bad' | 'info' }
 type InputFeedback = ArcadeSound | null
 const WORDS = ['번개', '스테이지', '콤보', '네온사인', '하이스코어', '동전', '보너스', '아케이드', '도전', '승부', '픽셀', '출발']
@@ -30,6 +31,7 @@ function App() {
   const [reduced, setReduced] = useState(() => localStorage.getItem('reducedEffects') === 'true')
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('soundEnabled') !== 'false')
   const [demo, setDemo] = useState(false)
+  const [gameMode, setGameMode] = useState<GameMode>('grab')
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const nicknameRef = useRef<HTMLInputElement>(null)
@@ -136,12 +138,13 @@ function App() {
     if (!nickname.trim()) { setNicknameRequired(true); setToast({ text: 'STEP 1 · 닉네임을 먼저 입력해 주세요', tone: 'bad' }); nicknameRef.current?.focus(); return }
     if (mode === 'join' && roomInput.trim().length < 4) { setToast({ text: '방 코드를 확인해 주세요', tone: 'bad' }); return }
     setExpiredRoomCode('')
+    setGameMode('grab')
     pendingRoomRef.current = mode === 'join' ? roomInput.trim().toUpperCase() : ''
     const message: ClientMessage = mode === 'create' ? { type: 'create_room', name: nickname.trim() } : { type: 'join_room', name: nickname.trim(), roomId: roomInput.trim().toUpperCase() }
     connect(message)
   }
-  const startDemo = (code = 'PIXEL') => {
-    setDemo(true); setPlayerId('me'); setState({ roomCode: code || 'PIXEL', phase: 'lobby', targets: [], players: [{ id: 'me', nickname: nickname.trim() || 'PLAYER 1', score: 0, combo: 0 }, { id: 'bot', nickname: 'TURBO.K', score: 0, combo: 0 }] }); setScreen('lobby')
+  const startDemo = (mode: GameMode = 'grab') => {
+    setGameMode(mode); setDemo(true); setPlayerId('me'); setState({ roomCode: mode === 'shoot' ? 'RANGE' : 'PIXEL', phase: 'lobby', targets: [], players: [{ id: 'me', nickname: nickname.trim() || 'PLAYER 1', score: 0, combo: 0 }, { id: 'bot', nickname: 'TURBO.K', score: 0, combo: 0 }] }); setScreen('lobby')
   }
   const leaveInvite = () => {
     setInviteRoomCode(''); setRoomInput(''); setExpiredRoomCode(''); setNicknameRequired(false)
@@ -164,6 +167,7 @@ function App() {
     if (!demo) send({ type: 'leave_room' })
     disconnect()
     setDemo(false)
+    setGameMode('grab')
     setState(emptyRoom())
     setScreen('home')
   }
@@ -236,7 +240,7 @@ function App() {
             <div className="divider"><span>또는 기존 방 참가</span></div>
             <label>방 코드<div className="join-row"><input maxLength={6} value={roomInput} onChange={e => { setRoomInput(e.target.value.toUpperCase()); setExpiredRoomCode('') }} onClick={() => { if (!hasNickname) { setNicknameRequired(true); nicknameRef.current?.focus() } }} readOnly={!hasNickname} aria-disabled={!hasNickname} placeholder={hasNickname ? '예: PIXEL' : '닉네임 입력 후 활성화'} /><button aria-disabled={!hasNickname} onClick={() => enterRoom('join')}>참가하기</button></div></label>
           </section>}
-          {inviteRoomCode ? <button className="demo-link" onClick={leaveInvite}>다른 방법으로 시작하기 →</button> : <button className="demo-link" onClick={() => startDemo()}>혼자 연습해 보기 →</button>}
+          {inviteRoomCode ? <button className="demo-link" onClick={leaveInvite}>다른 방법으로 시작하기 →</button> : <div className="demo-actions"><button className="demo-link" onClick={() => startDemo('grab')}>단어 쟁탈 연습 →</button><button className="demo-link shoot-link" onClick={() => startDemo('shoot')}>접시 사격 테스트 →</button></div>}
         </div>
         <div className="cabinet-controls"><i /><i /><span /></div>
       </section>
@@ -244,7 +248,7 @@ function App() {
     </main>}
 
     {screen === 'lobby' && <main className="lobby">
-      <p className="eyebrow">NOW ENTERING</p><h1>네온 스트리트 <span>01</span></h1>
+      <p className="eyebrow">NOW ENTERING</p><h1>{gameMode === 'shoot' ? '타이프 앤 슛' : '네온 스트리트'} <span>{gameMode === 'shoot' ? '02' : '01'}</span></h1>
       <section className="room-panel">
         <div><small>ROOM CODE</small><button className="room-code" onClick={() => navigator.clipboard?.writeText(state.roomCode)}>{state.roomCode} <span>⧉</span></button><button className="invite-link" onClick={copyInviteLink}>⌁ 초대 링크 복사</button><p>친구는 링크를 열고 닉네임만 입력하면 참가할 수 있어요.</p></div>
         <div className={`connection ${demo ? 'demo' : status}`}>● {demo ? '연습 모드' : status === 'online' ? '서버 연결됨' : '연결 확인 중'}</div>
@@ -253,12 +257,13 @@ function App() {
       <div className="lobby-actions"><button className="ghost" onClick={exitRoom}>← 나가기</button>{demo || state.hostId === playerId ? <button className="primary big" onClick={startGame}>게임 시작 <span>READY?</span></button> : <div className="waiting-host" role="status">방장이 게임을 시작하기를 기다리는 중…</div>}</div>
     </main>}
 
-    {screen === 'game' && <main className={`game feedback-${inputFeedback ?? 'idle'}`} onClick={() => inputRef.current?.focus()}>
-      <div className="game-hud"><div><small>ROOM</small><b>{state.roomCode}</b></div><div className={`timer ${seconds <= 10 ? 'danger' : ''}`}><small>TIME</small><strong>{String(seconds).padStart(2, '0')}<i>s</i></strong></div><div className="combo"><small>COMBO</small><b>× {me?.combo ?? 0}</b></div></div>
+    {screen === 'game' && <main className={`game mode-${gameMode} feedback-${inputFeedback ?? 'idle'}`} onClick={() => inputRef.current?.focus()}>
+      <div className="game-hud"><div><small>{gameMode === 'shoot' ? 'MODE' : 'ROOM'}</small><b>{gameMode === 'shoot' ? 'TYPE & SHOOT' : state.roomCode}</b></div><div className={`timer ${seconds <= 10 ? 'danger' : ''}`}><small>TIME</small><strong>{String(seconds).padStart(2, '0')}<i>s</i></strong></div><div className="combo"><small>COMBO</small><b>× {me?.combo ?? 0}</b></div></div>
       <div className="scoreboard">{sorted.map((p, i) => <div className={p.id === playerId ? 'mine' : ''} key={p.id}><span>{i + 1}</span><b>{p.nickname}</b><em>{p.score.toLocaleString()}</em></div>)}</div>
-      <section className="arena">
-        <p className="arena-label">TYPE ONE & PRESS ENTER</p>
-        <div className="targets">{state.targets.map((target, i) => <article key={target.id} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i}`}><small>{target.points ?? 100} PTS</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : 'LOCK ON'}</span>{burstIndex === i && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>)}</div>
+      <section className={`arena ${gameMode === 'shoot' ? 'shooting-arena' : ''}`}>
+        <p className="arena-label">{gameMode === 'shoot' ? 'TRACK · TYPE · SHOOT!' : 'TYPE ONE & PRESS ENTER'}</p>
+        <div className={`targets ${gameMode === 'shoot' ? 'shooting-targets' : ''}`}>{state.targets.map((target, i) => <article key={target.id} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i} ${gameMode === 'shoot' ? `clay plate-${i}` : ''}`}><small>{target.points ?? 100} PTS</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : 'LOCK ON'}</span>{burstIndex === i && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>)}</div>
+        {gameMode === 'shoot' && <div className="range-gun" aria-hidden="true"><i /><b>TYPE</b></div>}
         <form className={`type-form ${inputFeedback ? `is-${inputFeedback}` : ''}`} onSubmit={submit}><div className="prompt">›</div><input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="단어를 입력하세요" autoComplete="off" autoCapitalize="none" enterKeyHint="send" spellCheck={false} aria-label="단어 입력" /><button>ENTER ↵</button></form>
         <p className="tip">화면의 단어를 정확히 입력하고 ENTER! 가장 먼저 보낸 사람이 점수를 얻어요.</p>
       </section>
