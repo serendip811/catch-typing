@@ -1,6 +1,7 @@
 export type Player = { id: string; nickname: string; score: number; combo: number; connected?: boolean }
-export type Target = { id: string; text: string; points?: number }
-export type GameMode = 'grab' | 'shoot'
+export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' }
+export type GameMode = 'grab' | 'shoot' | 'zombie'
+export type ModeState = { baseHealth?: number; wave?: number; teamKills?: number }
 export type MatchState = {
   roomCode: string
   hostId?: string
@@ -10,11 +11,13 @@ export type MatchState = {
   players: Player[]
   endsAt?: number
   durationMs?: number
+  modeState?: ModeState
 }
 
 export type PublicRoom = {
   id: string; hostId: string; mode: GameMode; status: MatchState['phase']; durationMs: number; endsAt: number | null
-  targets: Array<{ id: string; text: string }>
+  modeState?: ModeState
+  targets: Array<{ id: string; text: string; spawnedAt?: number; expiresAt?: number; kind?: Target['kind'] }>
   players: Array<{ id: string; name: string; score: number; combo: number }>
 }
 
@@ -46,6 +49,7 @@ export const fromPublicRoom = (room: PublicRoom): MatchState => ({
   phase: room.status,
   durationMs: room.durationMs,
   endsAt: room.endsAt ?? undefined,
+  modeState: room.modeState,
   targets: room.targets.map(target => ({ ...target, points: 100 })),
   players: room.players.map(player => ({ id: player.id, nickname: player.name, score: player.score, combo: player.combo })),
 })

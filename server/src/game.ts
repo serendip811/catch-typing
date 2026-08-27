@@ -7,6 +7,7 @@ interface InternalRoom extends PublicRoom {
   claimedTargetIds: Set<string>;
   targetSequence: number;
   timer?: ReturnType<typeof setTimeout>;
+  tickTimer?: ReturnType<typeof setInterval>;
 }
 
 export interface GameOptions {
@@ -86,6 +87,7 @@ export class GameEngine extends EventEmitter {
     room.players.splice(index, 1);
     if (room.players.length === 0) {
       if (room.timer) clearTimeout(room.timer);
+      if (room.tickTimer) clearInterval(room.tickTimer);
       this.rooms.delete(room.id);
       return undefined;
     }
@@ -103,9 +105,14 @@ export class GameEngine extends EventEmitter {
     if (room.status === "finished") this.resetRoom(room);
     room.status = "playing";
     room.endsAt = this.now() + room.durationMs;
+    room.modeState = room.mode === "zombie" ? { baseHealth: 100, wave: 1, teamKills: 0 } : undefined;
     room.targets = Array.from({ length: this.targetCount }, () => this.nextTarget(room));
     room.timer = setTimeout(() => this.endMatch(room.id), room.durationMs);
     room.timer.unref?.();
+    if (room.mode === "zombie") {
+      room.tickTimer = setInterval(() => this.advanceMode(room.id), 250);
+      room.tickTimer.unref?.();
+    }
     const publicRoom = this.publicRoom(room);
     this.broadcast(room, { type: "match_started", room: publicRoom });
     return publicRoom;
@@ -142,6 +149,11 @@ export class GameEngine extends EventEmitter {
         player.combo += 1;
         scoreDelta = 100 + Math.min(player.combo - 1, 10) * 10;
         player.score += scoreDelta;
+        if (room.mode === "zombie" && room.modeState) {
+          room.modeState.teamKills = (room.modeState.teamKills ?? 0) + 1;
+          room.modeState.wave = Math.min(9, 1 + Math.floor((room.modeState.teamKills ?? 0) / 8));
+          if (player.combo % 3 === 0) room.modeState.baseHealth = Math.min(100, (room.modeState.baseHealth ?? 100) + 5);
+        }
       } else {
         player.combo = 0;
       }
@@ -151,8 +163,22 @@ export class GameEngine extends EventEmitter {
 
     this.broadcast(room, { type: "submission_result", playerId, targetId, outcome, scoreDelta, combo: player.combo, replacement });
     this.broadcast(room, { type: "room_state", room: this.publicRoom(room) });
-    if (outcome === "success" && player.combo > 0 && player.combo % 3 === 0) this.emitInterference(room, player);
+    if (room.mode !== "zombie" && outcome === "success" && player.combo > 0 && player.combo % 3 === 0) this.emitInterference(room, player);
     return outcome;
+  }
+
+  advanceMode(roomId: string): PublicRoom {
+    const room = this.requireRoom(roomId);
+    if (room.status !== "playing" || room.mode !== "zombie" || !room.modeState) return this.publicRoom(room);
+    const expiredIndexes = room.targets.flatMap((target, index) => target.expiresAt !== undefined && target.expiresAt <= this.now() ? [index] : []);
+    if (expiredIndexes.length === 0) return this.publicRoom(room);
+    const damage = expiredIndexes.reduce((total, index) => total + (room.targets[index].kind === "exploder" ? 20 : room.targets[index].kind === "armored" ? 14 : 10), 0);
+    room.modeState.baseHealth = Math.max(0, (room.modeState.baseHealth ?? 100) - damage);
+    for (const index of expiredIndexes) room.targets[index] = this.nextTarget(room);
+    if (room.modeState.baseHealth === 0) return this.endMatch(room.id);
+    const publicRoom = this.publicRoom(room);
+    this.broadcast(room, { type: "room_state", room: publicRoom });
+    return publicRoom;
   }
 
   endMatch(roomId: string): PublicRoom {
@@ -161,6 +187,8 @@ export class GameEngine extends EventEmitter {
     room.status = "finished";
     room.endsAt = null;
     if (room.timer) clearTimeout(room.timer);
+    if (room.tickTimer) clearInterval(room.tickTimer);
+    room.tickTimer = undefined;
     const publicRoom = this.publicRoom(room);
     this.broadcast(room, { type: "match_ended", room: publicRoom });
     return publicRoom;
@@ -194,7 +222,11 @@ export class GameEngine extends EventEmitter {
 
   private nextTarget(room: InternalRoom): Target {
     const text = this.words[Math.floor(this.random() * this.words.length)] ?? this.words[0];
-    return { id: `${room.id}-${++room.targetSequence}`, text };
+    if (room.mode !== "zombie") return { id: `${room.id}-${++room.targetSequence}`, text };
+    const wave = room.modeState?.wave ?? 1;
+    const lifetime = Math.max(4_800, 10_000 - wave * 550 + Math.floor(this.random() * 2_000));
+    const roll = this.random();
+    return { id: `${room.id}-${++room.targetSequence}`, text, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind: roll > .88 ? "exploder" : roll > .7 ? "armored" : "normal" };
   }
 
   private newPlayer(id: string, name: string): PlayerState {
@@ -203,10 +235,13 @@ export class GameEngine extends EventEmitter {
 
   private resetRoom(room: InternalRoom): void {
     if (room.timer) clearTimeout(room.timer);
+    if (room.tickTimer) clearInterval(room.tickTimer);
     room.timer = undefined;
+    room.tickTimer = undefined;
     room.status = "lobby";
     room.endsAt = null;
     room.targets = [];
+    room.modeState = undefined;
     room.claimedTargetIds.clear();
     for (const player of room.players) {
       player.score = 0;
@@ -223,7 +258,7 @@ export class GameEngine extends EventEmitter {
   private publicRoom(room: InternalRoom): PublicRoom {
     return {
       id: room.id, hostId: room.hostId, mode: room.mode, status: room.status, durationMs: room.durationMs,
-      endsAt: room.endsAt, targets: room.targets.map((target) => ({ ...target })),
+      endsAt: room.endsAt, modeState: room.modeState ? { ...room.modeState } : undefined, targets: room.targets.map((target) => ({ ...target })),
       players: room.players.map((player) => ({ ...player }))
     };
   }

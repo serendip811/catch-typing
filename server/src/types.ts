@@ -1,9 +1,18 @@
 export type RoomStatus = "lobby" | "playing" | "finished";
-export type GameMode = "grab" | "shoot";
+export type GameMode = "grab" | "shoot" | "zombie";
 
 export interface Target {
   id: string;
   text: string;
+  spawnedAt?: number;
+  expiresAt?: number;
+  kind?: "normal" | "armored" | "exploder";
+}
+
+export interface ModeState {
+  baseHealth?: number;
+  wave?: number;
+  teamKills?: number;
 }
 
 export interface PlayerState {
@@ -29,6 +38,7 @@ export interface PublicRoom {
   status: RoomStatus;
   durationMs: number;
   endsAt: number | null;
+  modeState?: ModeState;
   targets: Target[];
   players: PlayerState[];
 }

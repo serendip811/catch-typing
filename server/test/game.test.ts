@@ -27,6 +27,41 @@ describe("GameEngine", () => {
     assert.throws(() => engine.setMode(room.id, "host", "shoot"), /INVALID_ROOM_STATE/);
   });
 
+  it("starts zombie defense with shared base, wave, and timed enemies", () => {
+    let now = 1_000;
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => 0, words: ["번개"], idFactory: () => "BASE01" });
+    const room = engine.createRoom("host", "방장", "zombie");
+    const started = engine.startMatch(room.id, "host");
+    assert.deepEqual(started.modeState, { baseHealth: 100, wave: 1, teamKills: 0 });
+    assert.equal(started.targets.length, 3);
+    assert.ok(started.targets.every((target) => target.kind === "normal" && target.spawnedAt === 1_000 && target.expiresAt === 10_450));
+
+    now = 10_450;
+    const advanced = engine.advanceMode(room.id);
+    assert.equal(advanced.modeState?.baseHealth, 70);
+    assert.ok(advanced.targets.every((target) => target.spawnedAt === 10_450));
+    engine.endMatch(room.id);
+  });
+
+  it("heals the zombie base on a three-combo and never attacks teammates", () => {
+    let now = 1_000;
+    const events: ServerEvent[] = [];
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => 0, words: ["번개"], idFactory: () => "BASE01" });
+    const room = engine.createRoom("host", "방장", "zombie");
+    engine.startMatch(room.id, "host");
+    engine.on("event", (_roomId, event) => events.push(event));
+    now = 10_450;
+    engine.advanceMode(room.id);
+    for (let index = 0; index < 3; index += 1) {
+      const target = engine.getRoom(room.id)!.targets[0];
+      assert.equal(engine.submit(room.id, "host", target.id, target.text), "success");
+    }
+    assert.equal(engine.getRoom(room.id)?.modeState?.teamKills, 3);
+    assert.equal(engine.getRoom(room.id)?.modeState?.baseHealth, 75);
+    assert.equal(events.some((event) => event.type === "interference"), false);
+    engine.endMatch(room.id);
+  });
+
   it("lists only joinable lobby rooms with their mode and player count", () => {
     let sequence = 0;
     const engine = new GameEngine({ idFactory: () => `ROOM0${++sequence}`, maxPlayers: 2, minPlayers: 1 });
