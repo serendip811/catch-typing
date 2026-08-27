@@ -9,12 +9,14 @@ type Toast = { text: string; tone: 'good' | 'bad' | 'info' }
 type InputFeedback = ArcadeSound | null
 const WORDS = ['번개', '스테이지', '콤보', '네온사인', '하이스코어', '동전', '보너스', '아케이드', '도전', '승부', '픽셀', '출발']
 const starterTargets = (): Target[] => WORDS.slice(0, 5).map((text, i) => ({ id: `demo-${i}-${Date.now()}`, text, points: 100 + i * 20 }))
+const roomFromUrl = () => new URLSearchParams(window.location.search).get('room')?.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) ?? ''
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [nickname, setNickname] = useState('')
   const [nicknameRequired, setNicknameRequired] = useState(false)
-  const [roomInput, setRoomInput] = useState('')
+  const [inviteRoomCode, setInviteRoomCode] = useState(roomFromUrl)
+  const [roomInput, setRoomInput] = useState(roomFromUrl)
   const [playerId, setPlayerId] = useState('me')
   const [state, setState] = useState<MatchState>({ roomCode: '', phase: 'lobby', targets: [], players: [] })
   const [input, setInput] = useState('')
@@ -74,6 +76,23 @@ function App() {
   const startDemo = (code = 'PIXEL') => {
     setDemo(true); setPlayerId('me'); setState({ roomCode: code || 'PIXEL', phase: 'lobby', targets: [], players: [{ id: 'me', nickname: nickname.trim() || 'PLAYER 1', score: 0, combo: 0 }, { id: 'bot', nickname: 'TURBO.K', score: 0, combo: 0 }] }); setScreen('lobby')
   }
+  const leaveInvite = () => {
+    setInviteRoomCode(''); setRoomInput(''); setNicknameRequired(false)
+    window.history.replaceState({}, '', window.location.pathname)
+  }
+  const inviteUrl = useMemo(() => {
+    const url = new URL(import.meta.env.BASE_URL, window.location.origin)
+    url.searchParams.set('room', state.roomCode)
+    return url.toString()
+  }, [state.roomCode])
+  const copyInviteLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl)
+      setToast({ text: '초대 링크를 복사했어요!', tone: 'good' })
+    } catch {
+      setToast({ text: '링크를 복사하지 못했어요', tone: 'bad' })
+    }
+  }
   const startGame = () => {
     if (!demo && send({ type: 'start_match' })) return
     const now = Date.now(); setSeconds(60); setState(s => ({ ...s, phase: 'playing', targets: starterTargets(), endsAt: now + 60000, durationMs: 60000 })); setScreen('game'); window.setTimeout(() => inputRef.current?.focus(), 50)
@@ -111,19 +130,23 @@ function App() {
       <section className="cabinet" aria-label="게임 입장">
         <div className="cabinet-marquee">WORD BATTLE</div>
         <div className="cabinet-screen">
-          <div className="status-line"><span>PLAYER SETUP</span><b className={hasNickname ? 'ready' : 'required'}>{hasNickname ? '● READY' : '○ NAME REQUIRED'}</b></div>
+          <div className="status-line"><span>{inviteRoomCode ? 'ROOM INVITATION' : 'PLAYER SETUP'}</span><b className={hasNickname ? 'ready' : 'required'}>{hasNickname ? '● READY' : '○ NAME REQUIRED'}</b></div>
           <section className={`setup-step ${hasNickname ? 'complete' : ''}`} aria-labelledby="player-step-title">
-            <div className="step-heading"><span>1</span><div><strong id="player-step-title">플레이어 정보</strong><small>게임 생성과 참가에 모두 사용돼요</small></div>{hasNickname && <i>✓</i>}</div>
+            <div className="step-heading"><span>1</span><div><strong id="player-step-title">{inviteRoomCode ? '초대받은 플레이어' : '플레이어 정보'}</strong><small>{inviteRoomCode ? `${inviteRoomCode} 방에서 사용할 이름을 정하세요` : '게임 생성과 참가에 모두 사용돼요'}</small></div>{hasNickname && <i>✓</i>}</div>
             <label>닉네임 <em>필수</em><input ref={nicknameRef} maxLength={12} value={nickname} onChange={e => { setNickname(e.target.value); setNicknameRequired(false) }} placeholder="이름을 입력하세요" autoComplete="nickname" aria-invalid={nicknameRequired} /></label>
             {nicknameRequired && <p className="field-error" role="alert">먼저 사용할 닉네임을 입력해 주세요.</p>}
           </section>
-          <section className={`setup-step play-step ${hasNickname ? '' : 'locked'}`} aria-labelledby="play-step-title">
+          {inviteRoomCode ? <section className={`setup-step invite-step ${hasNickname ? '' : 'locked'}`} aria-labelledby="invite-step-title">
+            <div className="step-heading"><span>2</span><div><strong id="invite-step-title">초대받은 방 참가</strong><small>방 코드는 링크에서 자동으로 확인했어요</small></div></div>
+            <div className="invited-room"><small>ROOM CODE</small><b>{inviteRoomCode}</b></div>
+            <button className="primary invite-join" aria-disabled={!hasNickname} onClick={() => enterRoom('join')}>닉네임으로 바로 참가 <kbd>↵</kbd></button>
+          </section> : <section className={`setup-step play-step ${hasNickname ? '' : 'locked'}`} aria-labelledby="play-step-title">
             <div className="step-heading"><span>2</span><div><strong id="play-step-title">플레이 방법 선택</strong><small>{hasNickname ? '새 방을 만들거나 기존 방에 참가하세요' : '닉네임 입력 후 선택할 수 있어요'}</small></div></div>
             <button className="primary" aria-disabled={!hasNickname} onClick={() => enterRoom('create')}>새 게임 만들기 <kbd>↵</kbd></button>
             <div className="divider"><span>또는 기존 방 참가</span></div>
             <label>방 코드<div className="join-row"><input maxLength={6} value={roomInput} onChange={e => setRoomInput(e.target.value.toUpperCase())} onClick={() => { if (!hasNickname) { setNicknameRequired(true); nicknameRef.current?.focus() } }} readOnly={!hasNickname} aria-disabled={!hasNickname} placeholder={hasNickname ? '예: PIXEL' : '닉네임 입력 후 활성화'} /><button aria-disabled={!hasNickname} onClick={() => enterRoom('join')}>참가하기</button></div></label>
-          </section>
-          <button className="demo-link" onClick={() => startDemo()}>혼자 연습해 보기 →</button>
+          </section>}
+          {inviteRoomCode ? <button className="demo-link" onClick={leaveInvite}>다른 방법으로 시작하기 →</button> : <button className="demo-link" onClick={() => startDemo()}>혼자 연습해 보기 →</button>}
         </div>
         <div className="cabinet-controls"><i /><i /><span /></div>
       </section>
@@ -133,7 +156,7 @@ function App() {
     {screen === 'lobby' && <main className="lobby">
       <p className="eyebrow">NOW ENTERING</p><h1>네온 스트리트 <span>01</span></h1>
       <section className="room-panel">
-        <div><small>ROOM CODE</small><button className="room-code" onClick={() => navigator.clipboard?.writeText(state.roomCode)}>{state.roomCode} <span>⧉</span></button><p>코드를 눌러 복사하고 친구에게 알려주세요.</p></div>
+        <div><small>ROOM CODE</small><button className="room-code" onClick={() => navigator.clipboard?.writeText(state.roomCode)}>{state.roomCode} <span>⧉</span></button><button className="invite-link" onClick={copyInviteLink}>⌁ 초대 링크 복사</button><p>친구는 링크를 열고 닉네임만 입력하면 참가할 수 있어요.</p></div>
         <div className={`connection ${demo ? 'demo' : status}`}>● {demo ? '연습 모드' : status === 'online' ? '서버 연결됨' : '연결 확인 중'}</div>
       </section>
       <section className="players"><div className="section-title"><h2>PLAYERS</h2><span>{state.players.length} / 4</span></div>{state.players.map((p, i) => <div className="player-slot" key={p.id}><strong>P{i + 1}</strong><div className={`avatar a${i + 1}`}>{p.nickname.charAt(0)}</div><span>{p.nickname}</span><i>READY</i></div>)}{Array.from({ length: Math.max(0, 4 - state.players.length) }, (_, i) => <div className="player-slot empty" key={i}><strong>?</strong><div className="avatar">+</div><span>친구를 기다리는 중...</span><i>WAIT</i></div>)}</section>
