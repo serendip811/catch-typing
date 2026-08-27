@@ -50,6 +50,7 @@ function App() {
   const nicknameRef = useRef<HTMLInputElement>(null)
   const pendingRoomRef = useRef('')
   const viewportBaselineRef = useRef(0)
+  const zombieDelayRef = useRef(new Map<string, number>())
 
   const triggerFeedback = useCallback((kind: ArcadeSound, targetId?: string) => {
     playArcadeSound(kind, soundEnabled, gameMode === 'shoot')
@@ -336,7 +337,12 @@ function App() {
         <p className="arena-label">{gameMode === 'shoot' ? 'TRACK · TYPE · SHOOT!' : gameMode === 'zombie' ? 'DEFEND THE LAST KEYBOARD!' : 'TYPE ONE & PRESS ENTER'}</p>
         {gameMode === 'zombie' && <div className="zombie-status"><div><small>BASE CORE</small><strong>{state.modeState?.baseHealth ?? 100}%</strong></div><span className="health-track"><i style={{ width: `${state.modeState?.baseHealth ?? 100}%` }} /></span><div><small>WAVE</small><strong>{state.modeState?.wave ?? 1}</strong></div><div><small>ZAPS</small><strong>{state.modeState?.teamKills ?? 0}</strong></div></div>}
         <div className={`targets ${gameMode === 'shoot' ? 'shooting-targets' : gameMode === 'zombie' ? 'zombie-targets' : ''}`}>{state.targets.map((target, i) => {
-          const zombieStyle = gameMode === 'zombie' ? { '--zombie-duration': `${Math.max(1000, (target.expiresAt ?? Date.now() + 8000) - (target.spawnedAt ?? Date.now()))}ms`, '--zombie-delay': `-${Math.max(0, Date.now() - (target.spawnedAt ?? Date.now()))}ms` } as React.CSSProperties : undefined
+          let zombieStyle: React.CSSProperties | undefined
+          if (gameMode === 'zombie') {
+            const spawnedAt = target.spawnedAt ?? Date.now()
+            if (!zombieDelayRef.current.has(target.id)) zombieDelayRef.current.set(target.id, Math.max(0, Date.now() - spawnedAt))
+            zombieStyle = { '--zombie-duration': `${Math.max(1000, (target.expiresAt ?? spawnedAt + 8000) - spawnedAt)}ms`, '--zombie-delay': `-${zombieDelayRef.current.get(target.id) ?? 0}ms` } as React.CSSProperties
+          }
           return <article key={target.id} data-target-id={target.id} style={zombieStyle} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i} ${gameMode === 'shoot' ? `clay plate-${i}` : gameMode === 'zombie' ? `zombie zombie-${target.kind ?? 'normal'}` : ''}`}><small>{target.kind === 'armored' ? 'ARMORED' : target.kind === 'exploder' ? 'BOOMER' : `${target.points ?? 100} PTS`}</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : gameMode === 'zombie' ? 'TYPE TO ZAP' : 'LOCK ON'}</span>{burstIndex === i && gameMode !== 'shoot' && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>
         })}{gameMode === 'shoot' && shotEffect && <div className="shot-effect" aria-hidden="true" style={{ '--impact-x': `${shotEffect.x}px`, '--impact-y': `${shotEffect.y}px`, '--shot-length': `${shotEffect.length}px`, '--shot-angle': `${shotEffect.angle}deg` } as React.CSSProperties}><i className="bullet-trail" /><i className="impact-flash" /><b>BANG!</b><span className="clay-shards">{Array.from({ length: 14 }, (_, shard) => <i key={shard} style={{ '--shard': shard, '--fall-x': `${((shard * 37) % 150) - 75}px` } as React.CSSProperties} />)}</span></div>}</div>
         {gameMode === 'zombie' && <div className="last-keyboard" aria-hidden="true"><i /><b>LAST<br />KEYBOARD</b><span>⌨</span></div>}
