@@ -42,7 +42,7 @@
   .keyboard-open .scoreboard>div{flex:1 0 min(145px,43vw);min-width:0;height:32px;margin:2px 0;padding:6px;grid-template-columns:18px 1fr auto;font-size:9px}
   .keyboard-open .arena{width:100%;max-width:none;min-height:0;padding:4px 0 0;overflow:hidden}
   .keyboard-open .targets{height:100%;min-height:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(48px,1fr));gap:6px;align-content:stretch}
-  .keyboard-open .targets article{position:relative;inset:auto!important;min-width:0;width:auto;height:auto;padding:5px 8px;box-shadow:3px 3px 0 #080516;transform:none!important;animation:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .keyboard-open .targets article{position:relative;inset:auto!important;min-width:0;width:auto;height:auto;padding:5px 8px;box-shadow:3px 3px 0 #080516;transform:none;animation:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .keyboard-open .targets article:last-child{grid-column:1/-1}
   .keyboard-open .targets article small,.keyboard-open .targets article span{position:absolute;font-size:4px}
   .keyboard-open .targets article small{left:7px;top:6px}
@@ -55,11 +55,11 @@
   .keyboard-open .toast{top:25%;font-size:14px;white-space:nowrap}
   .keyboard-open .interference{inset:0;z-index:25}
   .keyboard-open .shooting-targets{position:relative;display:block;height:100%;min-height:0}
-  .keyboard-open .shooting-targets .clay{position:absolute!important;left:-145px;top:calc(var(--lane) * 19% + 2%)!important;width:138px;min-width:138px;height:42px;padding:3px 8px;border-radius:50%;display:flex;animation:plate-flight-mobile var(--speed) linear var(--delay) infinite var(--direction)!important}
+  .keyboard-open .shooting-targets .clay{position:absolute!important;left:-145px;top:calc(var(--lane) * 19% + 2%)!important;width:138px;min-width:138px;height:42px;padding:3px 8px;border-radius:50%;display:flex;will-change:transform;animation:plate-flight-mobile var(--speed) linear var(--delay) infinite var(--direction)!important}
   .keyboard-open .shooting-targets .clay strong{font-size:15px;padding-top:7px}
   .keyboard-open .shooting-targets .clay small{display:block;left:50%;top:4px;font-size:3px}
   .keyboard-open .shooting-targets .clay span{display:none}
   .keyboard-open .shooting-targets .clay:last-child{grid-column:auto}
   .keyboard-open .range-gun{display:none}
 }
-@keyframes plate-flight-mobile{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 290px))}}
+@keyframes plate-flight-mobile{from{transform:translate3d(0,0,0)}to{transform:translate3d(calc(100vw + 290px),0,0)}}
