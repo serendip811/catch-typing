@@ -7,6 +7,7 @@ import { playArcadeSound, type ArcadeSound } from './arcadeAudio'
 type Screen = 'home' | 'hub' | 'lobby' | 'game' | 'result'
 type Toast = { text: string; tone: 'good' | 'bad' | 'info' }
 type InputFeedback = ArcadeSound | null
+type ShotEffect = { x: number; y: number; length: number; angle: number }
 const WORDS = ['번개', '스테이지', '콤보', '네온사인', '하이스코어', '동전', '보너스', '아케이드', '도전', '승부', '픽셀', '출발']
 const starterTargets = (): Target[] => WORDS.slice(0, 5).map((text, i) => ({ id: `demo-${i}-${Date.now()}`, text, points: 100 + i * 20 }))
 const roomFromUrl = () => new URLSearchParams(window.location.search).get('room')?.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) ?? ''
@@ -27,6 +28,7 @@ function App() {
   const [effect, setEffect] = useState<'blur' | 'ink' | 'shake' | null>(null)
   const [inputFeedback, setInputFeedback] = useState<InputFeedback>(null)
   const [burstIndex, setBurstIndex] = useState<number | null>(null)
+  const [shotEffect, setShotEffect] = useState<ShotEffect | null>(null)
   const [reduced, setReduced] = useState(() => localStorage.getItem('reducedEffects') === 'true')
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('soundEnabled') !== 'false')
   const [demo, setDemo] = useState(false)
@@ -45,10 +47,28 @@ function App() {
     setInputFeedback(kind)
     if (kind === 'success' && targetId) {
       const index = state.targets.findIndex(target => target.id === targetId)
-      if (index >= 0) setBurstIndex(index)
+      if (index >= 0) {
+        setBurstIndex(index)
+        if (gameMode === 'shoot') {
+          const targetElement = [...document.querySelectorAll<HTMLElement>('[data-target-id]')].find(element => element.dataset.targetId === targetId)
+          const rangeElement = targetElement?.closest<HTMLElement>('.shooting-targets')
+          if (targetElement && rangeElement) {
+            const targetRect = targetElement.getBoundingClientRect()
+            const rangeRect = rangeElement.getBoundingClientRect()
+            const x = targetRect.left - rangeRect.left + targetRect.width / 2
+            const y = targetRect.top - rangeRect.top + targetRect.height / 2
+            const originX = rangeRect.width / 2
+            const originY = rangeRect.height + 10
+            const deltaX = x - originX
+            const deltaY = y - originY
+            setShotEffect({ x, y, length: Math.hypot(deltaX, deltaY), angle: Math.atan2(deltaY, deltaX) * 180 / Math.PI })
+          }
+        }
+      }
     }
     window.setTimeout(() => setInputFeedback(null), reduced ? 120 : 360)
     window.setTimeout(() => setBurstIndex(null), reduced ? 120 : 520)
+    window.setTimeout(() => setShotEffect(null), reduced ? 140 : 720)
   }, [gameMode, reduced, soundEnabled, state.targets])
 
   const onServerMessage = useCallback((message: ServerMessage) => {
@@ -293,8 +313,8 @@ function App() {
       <div className="scoreboard">{sorted.map((p, i) => <div className={p.id === playerId ? 'mine' : ''} key={p.id}><span>{i + 1}</span><b>{p.nickname}</b><em>{p.score.toLocaleString()}</em></div>)}</div>
       <section className={`arena ${gameMode === 'shoot' ? 'shooting-arena' : ''}`}>
         <p className="arena-label">{gameMode === 'shoot' ? 'TRACK · TYPE · SHOOT!' : 'TYPE ONE & PRESS ENTER'}</p>
-        <div className={`targets ${gameMode === 'shoot' ? 'shooting-targets' : ''}`}>{state.targets.map((target, i) => <article key={target.id} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i} ${gameMode === 'shoot' ? `clay plate-${i}` : ''}`}><small>{target.points ?? 100} PTS</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : 'LOCK ON'}</span>{burstIndex === i && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>)}</div>
-        {gameMode === 'shoot' && <div className={`range-gun ${burstIndex !== null ? 'firing' : ''}`} aria-hidden="true"><i /><b>TYPE</b></div>}
+        <div className={`targets ${gameMode === 'shoot' ? 'shooting-targets' : ''}`}>{state.targets.map((target, i) => <article key={target.id} data-target-id={target.id} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i} ${gameMode === 'shoot' ? `clay plate-${i}` : ''}`}><small>{target.points ?? 100} PTS</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : 'LOCK ON'}</span>{burstIndex === i && gameMode !== 'shoot' && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>)}{gameMode === 'shoot' && shotEffect && <div className="shot-effect" aria-hidden="true" style={{ '--impact-x': `${shotEffect.x}px`, '--impact-y': `${shotEffect.y}px`, '--shot-length': `${shotEffect.length}px`, '--shot-angle': `${shotEffect.angle}deg` } as React.CSSProperties}><i className="bullet-trail" /><i className="impact-flash" /><b>BANG!</b><span className="clay-shards">{Array.from({ length: 14 }, (_, shard) => <i key={shard} style={{ '--shard': shard, '--fall-x': `${((shard * 37) % 150) - 75}px` } as React.CSSProperties} />)}</span></div>}</div>
+        {gameMode === 'shoot' && <div className={`range-gun ${shotEffect ? 'firing' : ''}`} aria-hidden="true"><i /><b>TYPE</b></div>}
         <form className={`type-form ${inputFeedback ? `is-${inputFeedback}` : ''}`} onSubmit={submit}><div className="prompt">›</div><input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="단어를 입력하세요" autoComplete="off" autoCapitalize="none" enterKeyHint="send" spellCheck={false} aria-label="단어 입력" /><button>ENTER ↵</button></form>
         <p className="tip">화면의 단어를 정확히 입력하고 ENTER! 가장 먼저 보낸 사람이 점수를 얻어요.</p>
       </section>
