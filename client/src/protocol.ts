@@ -1,6 +1,6 @@
 export type Player = { id: string; nickname: string; score: number; combo: number; connected?: boolean }
-export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' }
-export type GameMode = 'grab' | 'shoot' | 'zombie'
+export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' | 'balloon' | 'chain' | 'bomb' | 'giant' }
+export type GameMode = 'grab' | 'shoot' | 'zombie' | 'balloon'
 export type ModeState = { baseHealth?: number; wave?: number; teamKills?: number }
 export type MatchState = {
   roomCode: string

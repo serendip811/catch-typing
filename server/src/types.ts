@@ -1,12 +1,12 @@
 export type RoomStatus = "lobby" | "playing" | "finished";
-export type GameMode = "grab" | "shoot" | "zombie";
+export type GameMode = "grab" | "shoot" | "zombie" | "balloon";
 
 export interface Target {
   id: string;
   text: string;
   spawnedAt?: number;
   expiresAt?: number;
-  kind?: "normal" | "armored" | "exploder";
+  kind?: "normal" | "armored" | "exploder" | "balloon" | "chain" | "bomb" | "giant";
 }
 
 export interface ModeState {

@@ -109,7 +109,7 @@ export class GameEngine extends EventEmitter {
     room.targets = Array.from({ length: this.targetCount }, () => this.nextTarget(room));
     room.timer = setTimeout(() => this.endMatch(room.id), room.durationMs);
     room.timer.unref?.();
-    if (room.mode === "zombie") {
+    if (room.mode === "zombie" || room.mode === "balloon") {
       room.tickTimer = setInterval(() => this.advanceMode(room.id), 250);
       room.tickTimer.unref?.();
     }
@@ -146,8 +146,16 @@ export class GameEngine extends EventEmitter {
         room.claimedTargetIds.add(claimed.id);
         replacement = this.nextTarget(room);
         room.targets.splice(index, 1, replacement);
-        player.combo += 1;
-        scoreDelta = 100 + Math.min(player.combo - 1, 10) * 10;
+        player.combo = claimed.kind === "bomb" ? 0 : player.combo + 1;
+        scoreDelta = claimed.kind === "bomb" ? -100 : claimed.kind === "giant" ? 250 : claimed.kind === "chain" ? 150 : 100 + Math.min(player.combo - 1, 10) * 10;
+        if (claimed.kind === "chain") {
+          const chainedIndex = room.targets.findIndex((target, candidateIndex) => candidateIndex !== index && target.kind === "chain");
+          if (chainedIndex >= 0) {
+            room.claimedTargetIds.add(room.targets[chainedIndex].id);
+            room.targets[chainedIndex] = this.nextTarget(room);
+            scoreDelta += 50;
+          }
+        }
         player.score += scoreDelta;
         if (room.mode === "zombie" && room.modeState) {
           room.modeState.teamKills = (room.modeState.teamKills ?? 0) + 1;
@@ -169,7 +177,16 @@ export class GameEngine extends EventEmitter {
 
   advanceMode(roomId: string): PublicRoom {
     const room = this.requireRoom(roomId);
-    if (room.status !== "playing" || room.mode !== "zombie" || !room.modeState) return this.publicRoom(room);
+    if (room.status !== "playing") return this.publicRoom(room);
+    if (room.mode === "balloon") {
+      const expiredIndexes = room.targets.flatMap((target, index) => target.expiresAt !== undefined && target.expiresAt <= this.now() ? [index] : []);
+      if (expiredIndexes.length === 0) return this.publicRoom(room);
+      for (const index of expiredIndexes) room.targets[index] = this.nextTarget(room);
+      const publicRoom = this.publicRoom(room);
+      this.broadcast(room, { type: "room_state", room: publicRoom });
+      return publicRoom;
+    }
+    if (room.mode !== "zombie" || !room.modeState) return this.publicRoom(room);
     const expiredIndexes = room.targets.flatMap((target, index) => target.expiresAt !== undefined && target.expiresAt <= this.now() ? [index] : []);
     if (expiredIndexes.length === 0) return this.publicRoom(room);
     const damage = expiredIndexes.reduce((total, index) => total + (room.targets[index].kind === "exploder" ? 20 : room.targets[index].kind === "armored" ? 14 : 10), 0);
@@ -222,6 +239,12 @@ export class GameEngine extends EventEmitter {
 
   private nextTarget(room: InternalRoom): Target {
     const text = this.words[Math.floor(this.random() * this.words.length)] ?? this.words[0];
+    if (room.mode === "balloon") {
+      const roll = this.random();
+      const kind = roll > .93 ? "bomb" : roll > .82 ? "giant" : roll > .58 ? "chain" : "balloon";
+      const lifetime = kind === "giant" ? 11_000 : 7_000 + Math.floor(this.random() * 2_500);
+      return { id: `${room.id}-${++room.targetSequence}`, text, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind };
+    }
     if (room.mode !== "zombie") return { id: `${room.id}-${++room.targetSequence}`, text };
     const wave = room.modeState?.wave ?? 1;
     const lifetime = Math.max(4_800, 10_000 - wave * 550 + Math.floor(this.random() * 2_000));

@@ -119,7 +119,7 @@ function requiredString(value: unknown): string {
 
 function gameMode(value: unknown): GameMode {
   if (value === undefined) return "grab";
-  if (value === "grab" || value === "shoot" || value === "zombie") return value;
+  if (value === "grab" || value === "shoot" || value === "zombie" || value === "balloon") return value;
   throw new Error("INVALID_GAME_MODE");
 }
 

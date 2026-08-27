@@ -62,6 +62,40 @@ describe("GameEngine", () => {
     engine.endMatch(room.id);
   });
 
+  it("replaces balloon targets that float off screen", () => {
+    let now = 1_000;
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => 0, words: ["풍선"], idFactory: () => "POP001" });
+    const room = engine.createRoom("host", "방장", "balloon");
+    const started = engine.startMatch(room.id, "host");
+    assert.ok(started.targets.every((target) => target.kind === "balloon" && target.expiresAt === 8_000));
+    const firstIds = started.targets.map((target) => target.id);
+    now = 8_000;
+    const advanced = engine.advanceMode(room.id);
+    assert.ok(advanced.targets.every((target, index) => target.id !== firstIds[index] && target.spawnedAt === 8_000));
+    engine.endMatch(room.id);
+  });
+
+  it("awards chain pops and penalizes bomb balloons", () => {
+    const chainEngine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => .7, words: ["연쇄"], idFactory: () => "CHAIN1" });
+    const chainRoom = chainEngine.createRoom("host", "방장", "balloon");
+    chainEngine.startMatch(chainRoom.id, "host");
+    const chainTarget = chainEngine.getRoom(chainRoom.id)!.targets[0];
+    assert.equal(chainTarget.kind, "chain");
+    assert.equal(chainEngine.submit(chainRoom.id, "host", chainTarget.id, chainTarget.text), "success");
+    assert.equal(chainEngine.getRoom(chainRoom.id)?.players[0].score, 200);
+    chainEngine.endMatch(chainRoom.id);
+
+    const bombEngine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => .95, words: ["폭탄"], idFactory: () => "BOMB01" });
+    const bombRoom = bombEngine.createRoom("host", "방장", "balloon");
+    bombEngine.startMatch(bombRoom.id, "host");
+    const bombTarget = bombEngine.getRoom(bombRoom.id)!.targets[0];
+    assert.equal(bombTarget.kind, "bomb");
+    assert.equal(bombEngine.submit(bombRoom.id, "host", bombTarget.id, bombTarget.text), "success");
+    assert.equal(bombEngine.getRoom(bombRoom.id)?.players[0].score, -100);
+    assert.equal(bombEngine.getRoom(bombRoom.id)?.players[0].combo, 0);
+    bombEngine.endMatch(bombRoom.id);
+  });
+
   it("lists only joinable lobby rooms with their mode and player count", () => {
     let sequence = 0;
     const engine = new GameEngine({ idFactory: () => `ROOM0${++sequence}`, maxPlayers: 2, minPlayers: 1 });
