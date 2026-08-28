@@ -240,3 +240,43 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden}
   .keyboard-open .zombie-targets .zombie{height:34px}
   .keyboard-open .zombie-targets .zombie.long-target,.keyboard-open .zombie-targets .zombie.very-long-target,.keyboard-open .zombie-targets .zombie-armored{height:38px}
 }
+
+/* Mobile clay range: five readable flight lanes with an expiring target meter. */
+@keyframes plate-timer{
+  0%{transform:scaleX(1);background:#65f5ff;box-shadow:0 0 5px #2ce8ff}
+  72%{background:#ffe342;box-shadow:0 0 6px #ffe342}
+  100%{transform:scaleX(0);background:#ff4d58;box-shadow:0 0 9px #ff3048}
+}
+
+@media(max-width:850px){
+  .keyboard-open .shooting-arena{height:100%;overflow:hidden}
+  .keyboard-open .shooting-targets{height:100%;min-height:0;margin:0;background:radial-gradient(circle at 82% 16%,#ffe34212 0 2px,transparent 3px),linear-gradient(180deg,#171332ee,#080719f5),repeating-linear-gradient(0deg,transparent 0,transparent calc(20% - 1px),#5f4c873d 20%)}
+  .keyboard-open .shooting-targets:before{content:"FIVE LANE CLAY RANGE";left:6px;bottom:5px;font-size:4px;color:#776789}
+  .keyboard-open .shooting-targets:after{content:"TYPE · AIM · FIRE";left:auto;right:7px;top:5px;font-size:4px;color:#8b7686}
+  .keyboard-open .shooting-targets .clay{top:calc(var(--lane) * 19% + 2%)!important;width:122px;min-width:122px;height:44px;padding:2px 6px;border-width:3px;box-shadow:inset 0 -5px 0 #3b1830,inset 0 4px 0 #ffb45a,0 0 14px #ff6b3b55,3px 4px 0 #080516;z-index:1}
+  .keyboard-open .shooting-targets .clay.plate-fast{width:108px;min-width:108px;height:38px;border-width:2px;box-shadow:inset 0 -4px 0 #10244d,inset 0 4px 0 #83f7ff,0 0 17px #2ce8ff77,3px 4px 0 #080516}
+  .keyboard-open .shooting-targets .clay.plate-gold{width:158px;min-width:158px;height:50px;border-width:3px;box-shadow:inset 0 -6px 0 #57311c,inset 0 5px 0 #fff39a,0 0 22px #ffe34288,4px 5px 0 #080516}
+  .keyboard-open .shooting-targets .clay.long-target{width:148px;min-width:148px;height:48px}
+  .keyboard-open .shooting-targets .clay.very-long-target{width:174px;min-width:174px;height:52px}
+  .keyboard-open .shooting-targets .clay.plate-gold.long-target,.keyboard-open .shooting-targets .clay.plate-gold.very-long-target{width:180px;min-width:180px;height:54px}
+  .keyboard-open .shooting-targets .clay:before{inset:5px 8px;border-width:1px}
+  .keyboard-open .shooting-targets .clay:after{display:block;z-index:4;left:16%;right:16%;top:auto;bottom:-7px;width:auto;height:3px;border-radius:0;transform-origin:left center;filter:none;background:#65f5ff;animation:plate-timer var(--speed) linear var(--delay) infinite}
+  .keyboard-open .shooting-targets .clay small{left:50%;top:3px;max-width:82%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:3px}
+  .keyboard-open .shooting-targets .clay strong{max-width:100%;padding:7px 2px 0;font-size:13px;line-height:1.05;text-align:center;white-space:normal;word-break:keep-all}
+  .keyboard-open .shooting-targets .clay.long-target strong{padding-top:7px;font-size:11px;line-height:1.1}
+  .keyboard-open .shooting-targets .clay.very-long-target strong{font-size:10px;line-height:1.08}
+  .keyboard-open .shooting-targets .clay.matching{z-index:5;border-color:#fff;outline:2px dashed #fff4a0;outline-offset:3px;filter:brightness(1.28);box-shadow:0 0 28px #fff3a5,4px 5px 0 #080516}
+  .keyboard-open .shooting-targets .clay.matching:before{border-color:#fff;box-shadow:inset 0 0 12px #fff7b8,0 0 9px #fff}
+  .keyboard-open .shooting-targets .clay.matching:after{height:4px;background:#fff;box-shadow:0 0 10px #fff}
+  .keyboard-open .range-gun{bottom:1px;width:43px;height:21px;transform:translateX(-50%) scale(.72);opacity:.9}
+  .keyboard-open .range-gun i{left:18px;top:-20px;width:6px;height:23px}
+  .keyboard-open .range-gun b{left:7px;top:8px;font-size:4px}
+  .keyboard-open .shot-effect>b{font-size:7px}
+  .keyboard-open .impact-flash{width:34px;height:34px}
+  .keyboard-open .clay-shards i{width:12px;height:7px}
+}
+
+@media(max-width:850px) and (max-height:560px){
+  .keyboard-open .shooting-targets .clay{height:38px}
+  .keyboard-open .shooting-targets .clay.long-target,.keyboard-open .shooting-targets .clay.very-long-target,.keyboard-open .shooting-targets .clay.plate-gold{height:44px}
+}
