@@ -62,6 +62,7 @@ function App() {
   const nicknameRef = useRef<HTMLInputElement>(null)
   const pendingRoomRef = useRef('')
   const viewportBaselineRef = useRef(0)
+  const keyboardViewportHeightRef = useRef<number | null>(null)
   const zombieDelayRef = useRef(new Map<string, number>())
   const baseHealthRef = useRef(100)
 
@@ -225,7 +226,13 @@ function App() {
       frame = window.requestAnimationFrame(() => {
         viewportBaselineRef.current = Math.max(viewportBaselineRef.current, viewport.height)
         const open = viewportBaselineRef.current - viewport.height > 180
-        document.documentElement.style.setProperty('--visual-viewport-height', `${Math.round(viewport.height)}px`)
+        if (open) {
+          keyboardViewportHeightRef.current = Math.min(keyboardViewportHeightRef.current ?? viewport.height, viewport.height)
+        } else {
+          keyboardViewportHeightRef.current = null
+        }
+        const stableHeight = keyboardViewportHeightRef.current ?? viewport.height
+        document.documentElement.style.setProperty('--visual-viewport-height', `${Math.round(stableHeight)}px`)
         document.documentElement.style.setProperty('--visual-viewport-top', `${Math.round(viewport.offsetTop)}px`)
         setKeyboardOpen(open)
         if (open) window.scrollTo({ top: 0, behavior: 'auto' })
@@ -240,6 +247,7 @@ function App() {
       viewport.removeEventListener('scroll', updateViewport)
       document.documentElement.style.removeProperty('--visual-viewport-height')
       document.documentElement.style.removeProperty('--visual-viewport-top')
+      keyboardViewportHeightRef.current = null
       setKeyboardOpen(false)
     }
   }, [screen])
