@@ -317,3 +317,7 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden}
   .keyboard-open .balloon-targets .balloon.long-target,.keyboard-open .balloon-targets .balloon.very-long-target{width:108px;min-width:108px;height:66px}
   .keyboard-open .balloon-targets .balloon-giant{width:104px;min-width:104px;height:74px}
 }
+
+/* Keep the game answer visually identical when iOS treats it as a search field. */
+.type-form input[type="search"]{-webkit-appearance:none;appearance:none}
+.type-form input[type="search"]::-webkit-search-cancel-button,.type-form input[type="search"]::-webkit-search-decoration{-webkit-appearance:none;display:none}
