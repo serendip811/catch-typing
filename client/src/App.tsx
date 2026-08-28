@@ -8,7 +8,11 @@ type Screen = 'home' | 'hub' | 'lobby' | 'game' | 'result'
 type Toast = { text: string; tone: 'good' | 'bad' | 'info' }
 type InputFeedback = ArcadeSound | null
 type ShotEffect = { x: number; y: number; length: number; angle: number }
-const WORDS = ['번개', '스테이지', '콤보', '네온사인', '하이스코어', '동전', '보너스', '아케이드', '도전', '승부', '픽셀', '출발']
+const WORDS = [
+  '번개', '퇴근까지 조금만 더', '네온사인', '우산 챙기는 걸 깜빡했다', '하이스코어',
+  '빠르고 정확하게 입력하세요', '보물상자가 나타났다', '마지막 판이라고 했는데', '콤보를 계속 이어가자',
+  '스테이지', '동전', '보너스', '아케이드', '도전', '승부', '픽셀', '출발',
+]
 const MODE_INFO: Record<GameMode, { number: string; label: string; title: string; badge: string; description: string }> = {
   grab: { number: '01', label: '단어 쟁탈전', title: '네온 스트리트', badge: 'CATCH', description: '고정된 단어를 먼저 선점' },
   shoot: { number: '02', label: '접시 사격', title: '타이프 앤 슛', badge: 'SHOOT', description: '움직이는 접시를 타이핑으로 격추' },
@@ -153,6 +157,17 @@ function App() {
     document.body.classList.toggle('game-keyboard-open', keyboardOpen)
     return () => document.body.classList.remove('game-keyboard-open')
   }, [keyboardOpen])
+  useEffect(() => {
+    if (!createPickerOpen) return
+    const scrollY = window.scrollY
+    document.body.classList.add('modal-open')
+    document.body.style.top = `-${scrollY}px`
+    return () => {
+      document.body.classList.remove('modal-open')
+      document.body.style.top = ''
+      window.scrollTo({ top: scrollY, behavior: 'auto' })
+    }
+  }, [createPickerOpen])
   useEffect(() => {
     if (!['home', 'hub'].includes(screen) || demo || status === 'connecting' || status === 'online') return
     const delay = status === 'offline' ? 2500 : 0
@@ -373,7 +388,7 @@ function App() {
             if (!zombieDelayRef.current.has(target.id)) zombieDelayRef.current.set(target.id, Math.max(0, Date.now() - spawnedAt))
             zombieStyle = { '--zombie-duration': `${Math.max(1000, (target.expiresAt ?? spawnedAt + 8000) - spawnedAt)}ms`, '--zombie-delay': `-${zombieDelayRef.current.get(target.id) ?? 0}ms` } as React.CSSProperties
           }
-          return <article key={target.id} data-target-id={target.id} style={zombieStyle} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} target-${i} ${gameMode === 'shoot' ? `clay plate-${i}` : gameMode === 'zombie' ? `zombie zombie-${target.kind ?? 'normal'}` : gameMode === 'balloon' ? `balloon balloon-${target.kind ?? 'balloon'}` : gameMode === 'racing' ? `race-target race-${target.kind ?? 'speed'}` : gameMode === 'treasure' ? `treasure-box treasure-${target.kind ?? 'chest'}` : ''}`}><small>{target.kind === 'armored' ? 'ARMORED' : target.kind === 'exploder' ? 'BOOMER' : target.kind === 'bomb' ? '☠ BOMB -100' : target.kind === 'giant' ? '★ GIANT 250' : target.kind === 'chain' ? '◇ CHAIN 150' : target.kind === 'nitro' ? '⚡ NITRO +14m' : target.kind === 'corner' ? '↪ CORNER +11m' : target.kind === 'speed' ? '» SPEED +8m' : target.kind === 'vault' ? '🔒 LOCKED VAULT' : target.kind === 'key' ? '🔑 KEY +80' : target.kind === 'map' ? '🗺 MAP +120' : target.kind === 'trap' ? '? MYSTERY' : target.kind === 'chest' ? 'CHEST +100' : `${target.points ?? 100} PTS`}</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : gameMode === 'zombie' ? 'TYPE TO ZAP' : gameMode === 'balloon' ? 'POP!' : gameMode === 'racing' ? 'SHIFT UP' : gameMode === 'treasure' ? 'OPEN' : 'LOCK ON'}</span>{burstIndex === i && gameMode !== 'shoot' && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>
+          return <article key={target.id} data-target-id={target.id} style={zombieStyle} className={`${prefixMatches(target) ? 'matching' : ''} ${burstIndex === i ? 'bursting' : ''} ${target.text.length >= 15 ? 'very-long-target' : target.text.length >= 9 ? 'long-target' : ''} target-${i} ${gameMode === 'shoot' ? `clay plate-${i}` : gameMode === 'zombie' ? `zombie zombie-${target.kind ?? 'normal'}` : gameMode === 'balloon' ? `balloon balloon-${target.kind ?? 'balloon'}` : gameMode === 'racing' ? `race-target race-${target.kind ?? 'speed'}` : gameMode === 'treasure' ? `treasure-box treasure-${target.kind ?? 'chest'}` : ''}`}><small>{target.kind === 'armored' ? 'ARMORED' : target.kind === 'exploder' ? 'BOOMER' : target.kind === 'bomb' ? '☠ BOMB -100' : target.kind === 'giant' ? '★ GIANT 250' : target.kind === 'chain' ? '◇ CHAIN 150' : target.kind === 'nitro' ? '⚡ NITRO +14m' : target.kind === 'corner' ? '↪ CORNER +11m' : target.kind === 'speed' ? '» SPEED +8m' : target.kind === 'vault' ? '🔒 LOCKED VAULT' : target.kind === 'key' ? '🔑 KEY +80' : target.kind === 'map' ? '🗺 MAP +120' : target.kind === 'trap' ? '? MYSTERY' : target.kind === 'chest' ? 'CHEST +100' : `${target.points ?? 100} PTS`}</small><strong>{target.text}</strong><span>{input && prefixMatches(target) ? `${input.length}/${target.text.length}` : gameMode === 'zombie' ? 'TYPE TO ZAP' : gameMode === 'balloon' ? 'POP!' : gameMode === 'racing' ? 'SHIFT UP' : gameMode === 'treasure' ? 'OPEN' : 'LOCK ON'}</span>{burstIndex === i && gameMode !== 'shoot' && <div className="pixel-burst" aria-hidden="true">{Array.from({ length: 12 }, (_, pixel) => <i key={pixel} style={{ '--pixel': pixel } as React.CSSProperties} />)}</div>}</article>
         })}{gameMode === 'shoot' && shotEffect && <div className="shot-effect" aria-hidden="true" style={{ '--impact-x': `${shotEffect.x}px`, '--impact-y': `${shotEffect.y}px`, '--shot-length': `${shotEffect.length}px`, '--shot-angle': `${shotEffect.angle}deg` } as React.CSSProperties}><i className="bullet-trail" /><i className="impact-flash" /><b>BANG!</b><span className="clay-shards">{Array.from({ length: 14 }, (_, shard) => <i key={shard} style={{ '--shard': shard, '--fall-x': `${((shard * 37) % 150) - 75}px` } as React.CSSProperties} />)}</span></div>}</div>
         {gameMode === 'zombie' && <div className="last-keyboard" aria-hidden="true"><i /><b>LAST<br />KEYBOARD</b><span>⌨</span></div>}
         {gameMode === 'shoot' && <div className={`range-gun ${shotEffect ? 'firing' : ''}`} aria-hidden="true"><i /><b>TYPE</b></div>}
