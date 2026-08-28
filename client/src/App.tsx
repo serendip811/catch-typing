@@ -188,7 +188,8 @@ function App() {
   useEffect(() => {
     if (screen !== 'game' || !inputRef.current) return
     const gameInput = inputRef.current
-    gameInput.setAttribute('autocomplete', 'one-time-code')
+    gameInput.type = 'search'
+    gameInput.setAttribute('autocomplete', 'off')
     gameInput.setAttribute('autocorrect', 'off')
     gameInput.setAttribute('autocapitalize', 'none')
     gameInput.setAttribute('aria-autocomplete', 'none')
