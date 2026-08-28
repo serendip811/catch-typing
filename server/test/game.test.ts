@@ -128,6 +128,46 @@ describe("GameEngine", () => {
     engine.endMatch(room.id);
   });
 
+  it("collects treasure keys and spends one to open a high-value vault", () => {
+    let roll = .5;
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 1, random: () => roll, words: ["보석", "금화"], idFactory: () => "LOOT01" });
+    const room = engine.createRoom("host", "탐험가", "treasure");
+    const started = engine.startMatch(room.id, "host");
+    assert.deepEqual(started.modeState, { treasure: { host: { keys: 0, maps: 0 } } });
+    let target = engine.getRoom(room.id)!.targets[0];
+    assert.equal(target.kind, "key");
+    roll = .95;
+    engine.submit(room.id, "host", target.id, target.text);
+    assert.deepEqual(engine.getRoom(room.id)?.modeState?.treasure?.host, { keys: 1, maps: 0 });
+    target = engine.getRoom(room.id)!.targets[0];
+    assert.equal(target.kind, "vault");
+    engine.submit(room.id, "host", target.id, target.text);
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 480);
+    assert.deepEqual(engine.getRoom(room.id)?.modeState?.treasure?.host, { keys: 0, maps: 0 });
+    engine.endMatch(room.id);
+  });
+
+  it("awards map set bonuses and resets combo on treasure traps", () => {
+    let roll = .7;
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 1, random: () => roll, words: ["유물"], idFactory: () => "MAP001" });
+    const room = engine.createRoom("host", "탐험가", "treasure");
+    engine.startMatch(room.id, "host");
+    for (let index = 0; index < 3; index += 1) {
+      const target = engine.getRoom(room.id)!.targets[0];
+      assert.equal(target.kind, "map");
+      if (index === 2) roll = .8;
+      engine.submit(room.id, "host", target.id, target.text);
+    }
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 560);
+    assert.deepEqual(engine.getRoom(room.id)?.modeState?.treasure?.host, { keys: 0, maps: 3 });
+    const target = engine.getRoom(room.id)!.targets[0];
+    assert.equal(target.kind, "trap");
+    engine.submit(room.id, "host", target.id, target.text);
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 480);
+    assert.equal(engine.getRoom(room.id)?.players[0].combo, 0);
+    engine.endMatch(room.id);
+  });
+
   it("lists only joinable lobby rooms with their mode and player count", () => {
     let sequence = 0;
     const engine = new GameEngine({ idFactory: () => `ROOM0${++sequence}`, maxPlayers: 2, minPlayers: 1 });
