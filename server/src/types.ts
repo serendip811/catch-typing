@@ -4,9 +4,10 @@ export type GameMode = "grab" | "shoot" | "zombie" | "balloon" | "racing" | "tre
 export interface Target {
   id: string;
   text: string;
+  points?: number;
   spawnedAt?: number;
   expiresAt?: number;
-  kind?: "normal" | "armored" | "exploder" | "balloon" | "chain" | "bomb" | "giant" | "speed" | "nitro" | "corner" | "chest" | "key" | "trap" | "vault" | "map" | "crown" | "guard";
+  kind?: "normal" | "armored" | "exploder" | "balloon" | "chain" | "bomb" | "giant" | "fast" | "gold" | "speed" | "nitro" | "corner" | "chest" | "key" | "trap" | "vault" | "map" | "crown" | "guard";
 }
 
 export interface ModeState {

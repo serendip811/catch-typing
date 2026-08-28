@@ -97,6 +97,12 @@ export class GameEngine extends EventEmitter {
     if (index < 0) return this.publicRoom(room);
 
     room.players.splice(index, 1);
+    if (room.modeState?.crown?.holderId === playerId) {
+      room.modeState.crown.holderId = undefined;
+      room.modeState.crown.streak = 0;
+      room.crownScoreCarryMs = 0;
+      room.crownLastTickAt = this.now();
+    }
     if (room.players.length === 0) {
       if (room.timer) clearTimeout(room.timer);
       if (room.tickTimer) clearInterval(room.tickTimer);
@@ -119,12 +125,12 @@ export class GameEngine extends EventEmitter {
     room.endsAt = this.now() + room.durationMs;
     room.modeState = room.mode === "zombie" ? { baseHealth: 100, wave: 1, teamKills: 0 } : room.mode === "racing" ? { trackLength: 100, race: Object.fromEntries(room.players.map((player) => [player.id, { distance: 0, nitro: 0 }])) } : room.mode === "treasure" ? { treasure: Object.fromEntries(room.players.map((player) => [player.id, { keys: 0, maps: 0 }])) } : room.mode === "crown" ? { crown: { streak: 0, heldMs: Object.fromEntries(room.players.map((player) => [player.id, 0])) } } : undefined;
     room.targets = [];
-    for (let index = 0; index < this.targetCount; index += 1) room.targets.push(this.nextTarget(room, room.mode === "crown" ? index === 0 ? "crown" : "guard" : undefined));
+    for (let index = 0; index < this.targetCount; index += 1) room.targets.push(this.nextTarget(room, room.mode === "crown" ? index === 0 ? "crown" : "guard" : room.mode === "racing" ? (["speed", "corner", "nitro"] as const)[index % 3] : room.mode === "treasure" ? (["key", "vault", "map", "trap", "chest"] as const)[index % 5] : room.mode === "balloon" ? (["balloon", "chain", "chain", "bomb", "giant"] as const)[index % 5] : room.mode === "shoot" ? (["normal", "fast", "gold", "normal"] as const)[index % 4] : undefined));
     room.crownLastTickAt = this.now();
     room.crownScoreCarryMs = 0;
     room.timer = setTimeout(() => this.endMatch(room.id), room.durationMs);
     room.timer.unref?.();
-    if (room.mode === "zombie" || room.mode === "balloon" || room.mode === "crown") {
+    if (room.mode === "zombie" || room.mode === "balloon" || room.mode === "shoot" || room.mode === "crown") {
       room.tickTimer = setInterval(() => this.advanceMode(room.id), 250);
       room.tickTimer.unref?.();
     }
@@ -157,15 +163,15 @@ export class GameEngine extends EventEmitter {
       const index = room.targets.findIndex((target) => target.id === targetId);
       if (index < 0 && room.claimedTargetIds.has(targetId)) {
         outcome = "claimed";
-      } else if (index >= 0 && normalize(room.targets[index].text) === normalize(text)) {
+      } else if (index >= 0 && normalize(room.targets[index].text) === normalize(text) && this.canClaimTarget(room, playerId, room.targets[index])) {
         outcome = "success";
         const claimed = room.targets[index];
         room.claimedTargetIds.add(claimed.id);
-        replacement = this.nextTarget(room, room.mode === "crown" ? claimed.kind === "crown" ? "crown" : "guard" : undefined);
+        replacement = this.nextTarget(room, room.mode === "crown" ? claimed.kind === "crown" ? "crown" : "guard" : room.mode === "racing" && (claimed.kind === "speed" || claimed.kind === "corner" || claimed.kind === "nitro") ? claimed.kind : room.mode === "treasure" && (claimed.kind === "key" || claimed.kind === "map" || claimed.kind === "vault") ? claimed.kind : room.mode === "shoot" && (claimed.kind === "normal" || claimed.kind === "fast" || claimed.kind === "gold") ? claimed.kind : undefined);
         room.targets.splice(index, 1, replacement);
         player.combo = claimed.kind === "bomb" || claimed.kind === "trap" ? 0 : player.combo + 1;
         const treasureBag = room.modeState?.treasure?.[player.id] ?? { keys: 0, maps: 0 };
-        scoreDelta = room.mode === "racing" ? claimed.kind === "nitro" ? 180 : claimed.kind === "corner" ? 130 : 100 : room.mode === "treasure" ? claimed.kind === "trap" ? -80 : claimed.kind === "vault" ? treasureBag.keys > 0 ? 400 : 180 : claimed.kind === "map" ? 120 : claimed.kind === "key" ? 80 : 100 : room.mode === "crown" ? claimed.kind === "crown" ? 150 : 80 : claimed.kind === "bomb" ? -100 : claimed.kind === "giant" ? 250 : claimed.kind === "chain" ? 150 : 100 + Math.min(player.combo - 1, 10) * 10;
+        scoreDelta = room.mode === "zombie" || room.mode === "shoot" ? claimed.points ?? 100 : room.mode === "racing" ? claimed.points ?? 100 : room.mode === "treasure" ? claimed.kind === "trap" ? -80 : claimed.kind === "vault" ? treasureBag.keys > 0 ? 400 : 180 : claimed.kind === "map" ? 120 : claimed.kind === "key" ? 80 : 100 : room.mode === "crown" ? claimed.kind === "crown" ? 150 : 80 : room.mode === "balloon" ? claimed.points ?? 100 : 100 + Math.min(player.combo - 1, 10) * 10;
         if (claimed.kind === "chain") {
           const chainedIndex = room.targets.findIndex((target, candidateIndex) => candidateIndex !== index && target.kind === "chain");
           if (chainedIndex >= 0) {
@@ -254,10 +260,13 @@ export class GameEngine extends EventEmitter {
       }
       const publicRoom = this.publicRoom(room); this.broadcast(room, { type: "room_state", room: publicRoom }); return publicRoom;
     }
-    if (room.mode === "balloon") {
+    if (room.mode === "balloon" || room.mode === "shoot") {
       const expiredIndexes = room.targets.flatMap((target, index) => target.expiresAt !== undefined && target.expiresAt <= this.now() ? [index] : []);
       if (expiredIndexes.length === 0) return this.publicRoom(room);
-      for (const index of expiredIndexes) room.targets[index] = this.nextTarget(room);
+      for (const index of expiredIndexes) {
+        const expired = room.targets[index];
+        room.targets[index] = this.nextTarget(room, room.mode === "shoot" && (expired.kind === "normal" || expired.kind === "fast" || expired.kind === "gold") ? expired.kind : undefined);
+      }
       const publicRoom = this.publicRoom(room);
       this.broadcast(room, { type: "room_state", room: publicRoom });
       return publicRoom;
@@ -265,7 +274,7 @@ export class GameEngine extends EventEmitter {
     if (room.mode !== "zombie" || !room.modeState) return this.publicRoom(room);
     const expiredIndexes = room.targets.flatMap((target, index) => target.expiresAt !== undefined && target.expiresAt <= this.now() ? [index] : []);
     if (expiredIndexes.length === 0) return this.publicRoom(room);
-    const damage = expiredIndexes.reduce((total, index) => total + (room.targets[index].kind === "exploder" ? 20 : room.targets[index].kind === "armored" ? 14 : 10), 0);
+    const damage = expiredIndexes.reduce((total, index) => total + (room.targets[index].kind === "exploder" ? 25 : room.targets[index].kind === "armored" ? 18 : 10), 0);
     room.modeState.baseHealth = Math.max(0, (room.modeState.baseHealth ?? 100) - damage);
     for (const index of expiredIndexes) room.targets[index] = this.nextTarget(room);
     if (room.modeState.baseHealth === 0) return this.endMatch(room.id);
@@ -315,32 +324,51 @@ export class GameEngine extends EventEmitter {
     this.broadcast(room, { type: "interference", fromPlayerId: source.id, toPlayerId: target.id, effect, durationMs: 1800 });
   }
 
-  private nextTarget(room: InternalRoom, forcedKind?: "crown" | "guard"): Target {
+  private nextTarget(room: InternalRoom, forcedKind?: "crown" | "guard" | "speed" | "corner" | "nitro" | "chest" | "key" | "trap" | "vault" | "map" | "balloon" | "chain" | "bomb" | "giant" | "normal" | "fast" | "gold"): Target {
     const text = this.nextWord(room);
     if (room.mode === "crown") return { id: `${room.id}-${++room.targetSequence}`, text, kind: forcedKind ?? "guard" };
+    if (room.mode === "shoot") {
+      const roll = this.random();
+      const kind = forcedKind === "normal" || forcedKind === "fast" || forcedKind === "gold" ? forcedKind : roll > .86 ? "gold" : roll > .58 ? "fast" : "normal";
+      const lifetime = kind === "fast" ? 4_600 : kind === "gold" ? 7_400 : 6_200;
+      return { id: `${room.id}-${++room.targetSequence}`, text: kind === "gold" ? `${text} ${this.nextWord(room)}` : text, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind, points: kind === "gold" ? 250 : kind === "fast" ? 160 : 100 };
+    }
     if (room.mode === "balloon") {
       const roll = this.random();
-      const kind = roll > .93 ? "bomb" : roll > .82 ? "giant" : roll > .58 ? "chain" : "balloon";
+      const kind = forcedKind === "balloon" || forcedKind === "chain" || forcedKind === "bomb" || forcedKind === "giant" ? forcedKind : roll > .93 ? "bomb" : roll > .82 ? "giant" : roll > .58 ? "chain" : "balloon";
       const lifetime = kind === "giant" ? 11_000 : 7_000 + Math.floor(this.random() * 2_500);
-      return { id: `${room.id}-${++room.targetSequence}`, text, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind };
+      return { id: `${room.id}-${++room.targetSequence}`, text: kind === "giant" ? `${text} ${this.nextWord(room)}` : text, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind, points: kind === "bomb" ? -100 : kind === "giant" ? 250 : kind === "chain" ? 150 : 100 };
     }
     if (room.mode === "racing") {
       const roll = this.random();
-      const kind = roll > .8 ? "nitro" : roll > .55 ? "corner" : "speed";
+      const kind = forcedKind === "speed" || forcedKind === "corner" || forcedKind === "nitro" ? forcedKind : roll > .8 ? "nitro" : roll > .55 ? "corner" : "speed";
       const second = this.nextWord(room);
-      return { id: `${room.id}-${++room.targetSequence}`, text: kind === "nitro" ? `${text} ${second}` : text, kind };
+      const third = kind === "nitro" ? this.nextWord(room) : undefined;
+      return { id: `${room.id}-${++room.targetSequence}`, text: kind === "nitro" ? `${text} ${second} ${third}` : kind === "corner" ? `${text} ${second}` : text, kind, points: kind === "nitro" ? 220 : kind === "corner" ? 140 : 100 };
     }
     if (room.mode === "treasure") {
       const roll = this.random();
-      const kind = roll > .9 ? "vault" : roll > .76 ? "trap" : roll > .58 ? "map" : roll > .4 ? "key" : "chest";
+      const kind = forcedKind === "chest" || forcedKind === "key" || forcedKind === "trap" || forcedKind === "vault" || forcedKind === "map" ? forcedKind : roll > .9 ? "vault" : roll > .76 ? "trap" : roll > .58 ? "map" : roll > .4 ? "key" : "chest";
       const second = this.nextWord(room);
-      return { id: `${room.id}-${++room.targetSequence}`, text: kind === "vault" ? `${text} ${second}` : text, kind };
+      return { id: `${room.id}-${++room.targetSequence}`, text: kind === "vault" ? `${text} ${second}` : text, kind, points: kind === "vault" ? 400 : kind === "map" ? 120 : kind === "key" ? 80 : kind === "trap" ? -80 : 100 };
     }
     if (room.mode !== "zombie") return { id: `${room.id}-${++room.targetSequence}`, text };
     const wave = room.modeState?.wave ?? 1;
-    const lifetime = Math.max(4_800, 10_000 - wave * 550 + Math.floor(this.random() * 2_000));
     const roll = this.random();
-    return { id: `${room.id}-${++room.targetSequence}`, text, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind: roll > .88 ? "exploder" : roll > .7 ? "armored" : "normal" };
+    const kind = roll > .88 ? "exploder" : roll > .7 ? "armored" : "normal";
+    const baseLifetime = kind === "exploder" ? 7_200 : kind === "armored" ? 11_500 : 10_000;
+    const lifetime = Math.max(kind === "exploder" ? 3_900 : 4_800, baseLifetime - wave * 500 + Math.floor(this.random() * 1_500));
+    const targetText = kind === "armored" ? `${text} ${this.nextWord(room)}` : text;
+    return { id: `${room.id}-${++room.targetSequence}`, text: targetText, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind, points: kind === "exploder" ? 200 : kind === "armored" ? 180 : 100 };
+  }
+
+  private canClaimTarget(room: InternalRoom, playerId: string, target: Target): boolean {
+    if (room.mode === "treasure" && target.kind === "vault") return (room.modeState?.treasure?.[playerId]?.keys ?? 0) > 0;
+    if (room.mode !== "crown" || !room.modeState?.crown) return true;
+    const holderId = room.modeState.crown.holderId;
+    if (target.kind === "crown") return holderId !== playerId;
+    if (target.kind === "guard") return holderId === playerId;
+    return false;
   }
 
   private newPlayer(id: string, name: string): PlayerState {

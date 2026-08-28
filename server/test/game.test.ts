@@ -34,12 +34,12 @@ describe("GameEngine", () => {
     const started = engine.startMatch(room.id, "host");
     assert.deepEqual(started.modeState, { baseHealth: 100, wave: 1, teamKills: 0 });
     assert.equal(started.targets.length, 3);
-    assert.ok(started.targets.every((target) => target.kind === "normal" && target.spawnedAt === 1_000 && target.expiresAt === 10_450));
+    assert.ok(started.targets.every((target) => target.kind === "normal" && target.points === 100 && target.spawnedAt === 1_000 && target.expiresAt === 10_500));
 
-    now = 10_450;
+    now = 10_500;
     const advanced = engine.advanceMode(room.id);
     assert.equal(advanced.modeState?.baseHealth, 70);
-    assert.ok(advanced.targets.every((target) => target.spawnedAt === 10_450));
+    assert.ok(advanced.targets.every((target) => target.spawnedAt === 10_500));
     engine.endMatch(room.id);
   });
 
@@ -50,7 +50,7 @@ describe("GameEngine", () => {
     const room = engine.createRoom("host", "방장", "zombie");
     engine.startMatch(room.id, "host");
     engine.on("event", (_roomId, event) => events.push(event));
-    now = 10_450;
+    now = 10_500;
     engine.advanceMode(room.id);
     for (let index = 0; index < 3; index += 1) {
       const target = engine.getRoom(room.id)!.targets[0];
@@ -62,12 +62,57 @@ describe("GameEngine", () => {
     engine.endMatch(room.id);
   });
 
+  it("makes armored zombies longer and boomers urgent high-risk targets", () => {
+    const armored = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => .8, words: ["철갑", "방어", "진격", "요새"], idFactory: () => "ARMOR1" });
+    const armoredRoom = armored.createRoom("host", "수비대", "zombie");
+    const armoredStarted = armored.startMatch(armoredRoom.id, "host");
+    assert.ok(armoredStarted.targets.every((target) => target.kind === "armored" && target.points === 180 && target.text.includes(" ")));
+    const armoredTarget = armoredStarted.targets[0];
+    armored.submit(armoredRoom.id, "host", armoredTarget.id, armoredTarget.text);
+    assert.equal(armored.getRoom(armoredRoom.id)?.players[0].score, 180);
+    armored.endMatch(armoredRoom.id);
+
+    let now = 1_000;
+    const boomer = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => .9, words: ["폭발", "경고", "위험", "후퇴"], idFactory: () => "BOOM01" });
+    const boomerRoom = boomer.createRoom("host", "수비대", "zombie");
+    const boomerStarted = boomer.startMatch(boomerRoom.id, "host");
+    assert.ok(boomerStarted.targets.every((target) => target.kind === "exploder" && target.points === 200));
+    now = Math.max(...boomerStarted.targets.map((target) => target.expiresAt ?? 0));
+    boomer.advanceMode(boomerRoom.id);
+    assert.equal(boomer.getRoom(boomerRoom.id)?.modeState?.baseHealth, 25);
+    boomer.endMatch(boomerRoom.id);
+  });
+
+  it("creates timed normal, fast, and gold shooting plates with distinct rewards", () => {
+    let now = 1_000;
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => 0, words: ["조준", "발사", "명중", "황금"], idFactory: () => "SHOT01" });
+    const room = engine.createRoom("host", "사수", "shoot");
+    const started = engine.startMatch(room.id, "host");
+    assert.deepEqual(started.targets.map((target) => target.kind), ["normal", "fast", "gold"]);
+    assert.deepEqual(started.targets.map((target) => target.points), [100, 160, 250]);
+    assert.deepEqual(started.targets.map((target) => target.expiresAt), [7_200, 5_600, 8_400]);
+    assert.ok(started.targets[2].text.includes(" "));
+
+    const fastId = started.targets[1].id;
+    now = 5_600;
+    const advanced = engine.advanceMode(room.id);
+    assert.equal(advanced.targets[1].kind, "fast");
+    assert.notEqual(advanced.targets[1].id, fastId);
+    assert.equal(advanced.targets[1].spawnedAt, 5_600);
+
+    const gold = engine.getRoom(room.id)!.targets.find((target) => target.kind === "gold")!;
+    assert.equal(engine.submit(room.id, "host", gold.id, gold.text), "success");
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 250);
+    engine.endMatch(room.id);
+  });
+
   it("replaces balloon targets that float off screen", () => {
     let now = 1_000;
     const engine = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => 0, words: ["풍선"], idFactory: () => "POP001" });
     const room = engine.createRoom("host", "방장", "balloon");
     const started = engine.startMatch(room.id, "host");
-    assert.ok(started.targets.every((target) => target.kind === "balloon" && target.expiresAt === 8_000));
+    assert.deepEqual(started.targets.map((target) => target.kind), ["balloon", "chain", "chain"]);
+    assert.ok(started.targets.every((target) => target.expiresAt === 8_000));
     const firstIds = started.targets.map((target) => target.id);
     now = 8_000;
     const advanced = engine.advanceMode(room.id);
@@ -79,16 +124,17 @@ describe("GameEngine", () => {
     const chainEngine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => .7, words: ["연쇄"], idFactory: () => "CHAIN1" });
     const chainRoom = chainEngine.createRoom("host", "방장", "balloon");
     chainEngine.startMatch(chainRoom.id, "host");
-    const chainTarget = chainEngine.getRoom(chainRoom.id)!.targets[0];
+    assert.deepEqual(chainEngine.getRoom(chainRoom.id)?.targets.map((target) => target.kind), ["balloon", "chain", "chain"]);
+    const chainTarget = chainEngine.getRoom(chainRoom.id)!.targets.find((target) => target.kind === "chain")!;
     assert.equal(chainTarget.kind, "chain");
     assert.equal(chainEngine.submit(chainRoom.id, "host", chainTarget.id, chainTarget.text), "success");
     assert.equal(chainEngine.getRoom(chainRoom.id)?.players[0].score, 200);
     chainEngine.endMatch(chainRoom.id);
 
-    const bombEngine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => .95, words: ["폭탄"], idFactory: () => "BOMB01" });
+    const bombEngine = new GameEngine({ minPlayers: 1, targetCount: 4, random: () => .95, words: ["폭탄"], idFactory: () => "BOMB01" });
     const bombRoom = bombEngine.createRoom("host", "방장", "balloon");
     bombEngine.startMatch(bombRoom.id, "host");
-    const bombTarget = bombEngine.getRoom(bombRoom.id)!.targets[0];
+    const bombTarget = bombEngine.getRoom(bombRoom.id)!.targets.find((target) => target.kind === "bomb")!;
     assert.equal(bombTarget.kind, "bomb");
     assert.equal(bombEngine.submit(bombRoom.id, "host", bombTarget.id, bombTarget.text), "success");
     assert.equal(bombEngine.getRoom(bombRoom.id)?.players[0].score, -100);
@@ -101,7 +147,10 @@ describe("GameEngine", () => {
     const room = engine.createRoom("host", "레이서", "racing");
     const started = engine.startMatch(room.id, "host");
     assert.deepEqual(started.modeState, { trackLength: 100, race: { host: { distance: 0, nitro: 0 } } });
-    assert.ok(started.targets.every((target) => target.kind === "speed"));
+    assert.deepEqual(started.targets.map((target) => target.kind), ["speed", "corner", "nitro"]);
+    assert.equal(started.targets.find((target) => target.kind === "speed")?.points, 100);
+    assert.equal(started.targets.find((target) => target.kind === "corner")?.points, 140);
+    assert.equal(started.targets.find((target) => target.kind === "nitro")?.points, 220);
     let target = engine.getRoom(room.id)!.targets[0];
     engine.submit(room.id, "host", target.id, target.text);
     assert.equal(engine.getRoom(room.id)?.modeState?.race?.host.distance, 8);
@@ -120,8 +169,9 @@ describe("GameEngine", () => {
     const room = engine.createRoom("host", "레이서", "racing");
     engine.startMatch(room.id, "host");
     for (let index = 0; index < 3; index += 1) {
-      const target = engine.getRoom(room.id)!.targets[0];
+      const target = engine.getRoom(room.id)!.targets.find((candidate) => candidate.kind === "nitro")!;
       assert.equal(target.kind, "nitro");
+      assert.equal(target.text.split(" ").length, 3);
       assert.equal(engine.submit(room.id, "host", target.id, target.text), "success");
     }
     assert.deepEqual(engine.getRoom(room.id)?.modeState?.race?.host, { distance: 60, nitro: 0 });
@@ -134,12 +184,11 @@ describe("GameEngine", () => {
     const room = engine.createRoom("host", "탐험가", "treasure");
     const started = engine.startMatch(room.id, "host");
     assert.deepEqual(started.modeState, { treasure: { host: { keys: 0, maps: 0 } } });
-    let target = engine.getRoom(room.id)!.targets[0];
+    let target = engine.getRoom(room.id)!.targets.find((candidate) => candidate.kind === "key")!;
     assert.equal(target.kind, "key");
-    roll = .95;
     engine.submit(room.id, "host", target.id, target.text);
     assert.deepEqual(engine.getRoom(room.id)?.modeState?.treasure?.host, { keys: 1, maps: 0 });
-    target = engine.getRoom(room.id)!.targets[0];
+    target = engine.getRoom(room.id)!.targets.find((candidate) => candidate.kind === "vault")!;
     assert.equal(target.kind, "vault");
     engine.submit(room.id, "host", target.id, target.text);
     assert.equal(engine.getRoom(room.id)?.players[0].score, 480);
@@ -149,22 +198,37 @@ describe("GameEngine", () => {
 
   it("awards map set bonuses and resets combo on treasure traps", () => {
     let roll = .7;
-    const engine = new GameEngine({ minPlayers: 1, targetCount: 1, random: () => roll, words: ["유물"], idFactory: () => "MAP001" });
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 4, random: () => roll, words: ["유물"], idFactory: () => "MAP001" });
     const room = engine.createRoom("host", "탐험가", "treasure");
     engine.startMatch(room.id, "host");
     for (let index = 0; index < 3; index += 1) {
-      const target = engine.getRoom(room.id)!.targets[0];
+      const target = engine.getRoom(room.id)!.targets.find((candidate) => candidate.kind === "map")!;
       assert.equal(target.kind, "map");
-      if (index === 2) roll = .8;
       engine.submit(room.id, "host", target.id, target.text);
     }
     assert.equal(engine.getRoom(room.id)?.players[0].score, 560);
     assert.deepEqual(engine.getRoom(room.id)?.modeState?.treasure?.host, { keys: 0, maps: 3 });
-    const target = engine.getRoom(room.id)!.targets[0];
+    const target = engine.getRoom(room.id)!.targets.find((candidate) => candidate.kind === "trap")!;
     assert.equal(target.kind, "trap");
     engine.submit(room.id, "host", target.id, target.text);
     assert.equal(engine.getRoom(room.id)?.players[0].score, 480);
     assert.equal(engine.getRoom(room.id)?.players[0].combo, 0);
+    engine.endMatch(room.id);
+  });
+
+  it("keeps vaults locked until the player earns a key", () => {
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 4, random: () => 0, words: ["금고", "열쇠", "지도", "상자", "보석"], idFactory: () => "LOOT01" });
+    const room = engine.createRoom("host", "탐험가", "treasure");
+    engine.startMatch(room.id, "host");
+    let vault = engine.getRoom(room.id)!.targets.find((target) => target.kind === "vault")!;
+    assert.equal(engine.submit(room.id, "host", vault.id, vault.text), "miss");
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 0);
+    const key = engine.getRoom(room.id)!.targets.find((target) => target.kind === "key")!;
+    assert.equal(engine.submit(room.id, "host", key.id, key.text), "success");
+    vault = engine.getRoom(room.id)!.targets.find((target) => target.kind === "vault")!;
+    assert.equal(engine.submit(room.id, "host", vault.id, vault.text), "success");
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 480);
+    assert.equal(engine.getRoom(room.id)?.modeState?.treasure?.host.keys, 0);
     engine.endMatch(room.id);
   });
 
@@ -221,6 +285,43 @@ describe("GameEngine", () => {
     engine.advanceMode(room.id);
     assert.equal(engine.getRoom(room.id)?.players[0].score, 440);
     assert.equal(events.some((event) => event.type === "interference"), false);
+    engine.endMatch(room.id);
+  });
+
+  it("gives challengers only crown claims and the ruler only defense claims", () => {
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => 0, words: ["왕관", "방패", "성문", "기사"], idFactory: () => "CROWN1" });
+    const room = engine.createRoom("host", "왕", "crown");
+    engine.joinRoom(room.id, "rival", "도전자");
+    engine.startMatch(room.id, "host");
+    let current = engine.getRoom(room.id)!;
+    let crownTarget = current.targets.find((target) => target.kind === "crown")!;
+    let guardTarget = current.targets.find((target) => target.kind === "guard")!;
+
+    assert.equal(engine.submit(room.id, "rival", guardTarget.id, guardTarget.text), "miss");
+    assert.equal(engine.getRoom(room.id)?.players.find((player) => player.id === "rival")?.score, 0);
+    assert.equal(engine.submit(room.id, "host", crownTarget.id, crownTarget.text), "success");
+
+    current = engine.getRoom(room.id)!;
+    crownTarget = current.targets.find((target) => target.kind === "crown")!;
+    guardTarget = current.targets.find((target) => target.kind === "guard")!;
+    assert.equal(engine.submit(room.id, "host", crownTarget.id, crownTarget.text), "miss");
+    assert.equal(engine.submit(room.id, "rival", guardTarget.id, guardTarget.text), "miss");
+    assert.equal(engine.submit(room.id, "host", guardTarget.id, guardTarget.text), "success");
+    assert.equal(engine.getRoom(room.id)?.modeState?.crown?.streak, 2);
+    engine.endMatch(room.id);
+  });
+
+  it("drops the crown when its ruler leaves a running match", () => {
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => 0, words: ["왕관", "방패", "성문"], idFactory: () => "CROWN1" });
+    const room = engine.createRoom("host", "왕", "crown");
+    engine.joinRoom(room.id, "rival", "도전자");
+    engine.startMatch(room.id, "host");
+    const crownTarget = engine.getRoom(room.id)!.targets.find((target) => target.kind === "crown")!;
+    engine.submit(room.id, "host", crownTarget.id, crownTarget.text);
+    const remaining = engine.leaveRoom(room.id, "host");
+    assert.equal(remaining?.modeState?.crown?.holderId, undefined);
+    assert.equal(remaining?.modeState?.crown?.streak, 0);
+    assert.equal(remaining?.hostId, "rival");
     engine.endMatch(room.id);
   });
 

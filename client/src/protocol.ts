@@ -1,5 +1,5 @@
 export type Player = { id: string; nickname: string; score: number; combo: number; connected?: boolean }
-export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' | 'balloon' | 'chain' | 'bomb' | 'giant' | 'speed' | 'nitro' | 'corner' | 'chest' | 'key' | 'trap' | 'vault' | 'map' | 'crown' | 'guard' }
+export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' | 'balloon' | 'chain' | 'bomb' | 'giant' | 'fast' | 'gold' | 'speed' | 'nitro' | 'corner' | 'chest' | 'key' | 'trap' | 'vault' | 'map' | 'crown' | 'guard' }
 export type GameMode = 'grab' | 'shoot' | 'zombie' | 'balloon' | 'racing' | 'treasure' | 'crown'
 export type ModeState = { baseHealth?: number; wave?: number; teamKills?: number; trackLength?: number; race?: Record<string, { distance: number; nitro: number; finishedAt?: number }>; treasure?: Record<string, { keys: number; maps: number }>; crown?: { holderId?: string; streak: number; heldMs: Record<string, number> } }
 export type MatchState = {
@@ -18,7 +18,7 @@ export type MatchState = {
 export type PublicRoom = {
   id: string; hostId: string; mode: GameMode; status: MatchState['phase']; durationMs: number; endsAt: number | null
   modeState?: ModeState
-  targets: Array<{ id: string; text: string; spawnedAt?: number; expiresAt?: number; kind?: Target['kind'] }>
+  targets: Array<{ id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: Target['kind'] }>
   players: Array<{ id: string; name: string; score: number; combo: number }>
   spectators: Array<{ id: string; name: string }>
 }
@@ -52,7 +52,7 @@ export const fromPublicRoom = (room: PublicRoom): MatchState => ({
   durationMs: room.durationMs,
   endsAt: room.endsAt ?? undefined,
   modeState: room.modeState,
-  targets: room.targets.map(target => ({ ...target, points: 100 })),
+  targets: room.targets.map(target => ({ ...target, points: target.points ?? 100 })),
   players: room.players.map(player => ({ id: player.id, nickname: player.name, score: player.score, combo: player.combo })),
   spectators: (room.spectators ?? []).map(spectator => ({ id: spectator.id, nickname: spectator.name })),
 })
