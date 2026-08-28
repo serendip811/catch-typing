@@ -185,6 +185,17 @@ function App() {
     return () => document.body.classList.remove('game-keyboard-open')
   }, [keyboardOpen])
   useEffect(() => {
+    if (screen !== 'game' || !inputRef.current) return
+    const gameInput = inputRef.current
+    gameInput.setAttribute('autocomplete', 'one-time-code')
+    gameInput.setAttribute('autocorrect', 'off')
+    gameInput.setAttribute('autocapitalize', 'none')
+    gameInput.setAttribute('aria-autocomplete', 'none')
+    gameInput.setAttribute('data-1p-ignore', 'true')
+    gameInput.setAttribute('data-lpignore', 'true')
+    gameInput.name = 'arcade-answer'
+  }, [screen])
+  useEffect(() => {
     if (!createPickerOpen) return
     const scrollY = window.scrollY
     document.body.classList.add('modal-open')
