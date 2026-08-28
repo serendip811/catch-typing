@@ -280,3 +280,40 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden}
   .keyboard-open .shooting-targets .clay{height:38px}
   .keyboard-open .shooting-targets .clay.long-target,.keyboard-open .shooting-targets .clay.very-long-target,.keyboard-open .shooting-targets .clay.plate-gold{height:44px}
 }
+
+/* Mobile balloon sky: separated launch lanes and unmistakable balloon roles. */
+@media(max-width:850px){
+  .keyboard-open .balloon-arena{height:100%;overflow:hidden}
+  .keyboard-open .balloon-targets{height:100%;min-height:0;margin:0;background:radial-gradient(ellipse at 18% 18%,#ffffff12 0 8%,transparent 9%),radial-gradient(ellipse at 78% 35%,#ffffff0d 0 6%,transparent 7%),linear-gradient(180deg,#241650,#090720 68%,#151031)}
+  .keyboard-open .balloon-targets:before{content:"POP SKY · BOMB AVOID";left:7px;top:6px;font-size:4px;color:#9777aa}
+  .keyboard-open .balloon-targets .balloon{width:78px;min-width:78px;height:66px;padding:6px 4px 2px;border-width:2px;box-shadow:inset -6px -8px 0 #521b5c,0 0 15px #ff4fc466,3px 5px 0 #070412;z-index:1}
+  .keyboard-open .balloon-targets .balloon-chain{width:84px;min-width:84px;height:70px;border-width:4px;box-shadow:inset -6px -8px 0 #13446d,0 0 20px #2ce8ff88,3px 5px 0 #070412}
+  .keyboard-open .balloon-targets .balloon-giant{width:112px;min-width:112px;height:84px;border-width:3px;box-shadow:inset -9px -11px 0 #9b3f39,0 0 25px #ffe34288,4px 6px 0 #070412}
+  .keyboard-open .balloon-targets .balloon-bomb{width:74px;min-width:74px;height:70px;border:3px dashed #ff5267;box-shadow:inset -6px -8px 0 #08070c,0 0 22px #ff304e99,3px 5px 0 #070412}
+  .keyboard-open .balloon-targets .balloon.long-target{width:112px;min-width:112px;height:74px}
+  .keyboard-open .balloon-targets .balloon.very-long-target{width:136px;min-width:136px;height:80px}
+  .keyboard-open .balloon-targets .balloon-giant.long-target,.keyboard-open .balloon-targets .balloon-giant.very-long-target{width:144px;min-width:144px;height:92px}
+  .keyboard-open .balloon-targets .target-0{left:1%}
+  .keyboard-open .balloon-targets .target-1{left:20%}
+  .keyboard-open .balloon-targets .target-2{left:40%}
+  .keyboard-open .balloon-targets .target-3{left:60%}
+  .keyboard-open .balloon-targets .target-4{left:79%}
+  .keyboard-open .balloon-targets .balloon small{left:50%;top:7px;max-width:84%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:3px}
+  .keyboard-open .balloon-targets .balloon strong{max-width:100%;padding:10px 2px 4px;font-size:12px;line-height:1.06;text-align:center;white-space:normal;word-break:keep-all}
+  .keyboard-open .balloon-targets .balloon.long-target strong{font-size:10px;line-height:1.1}
+  .keyboard-open .balloon-targets .balloon.very-long-target strong{font-size:9px;line-height:1.08}
+  .keyboard-open .balloon-targets .balloon span{display:block;position:absolute;left:50%;bottom:5px;transform:translateX(-50%);font-family:'Press Start 2P';font-size:3px;white-space:nowrap;color:#ffe6f7}
+  .keyboard-open .balloon-targets .balloon-chain span{color:#9ffff3}
+  .keyboard-open .balloon-targets .balloon-giant span{color:#fff29a}
+  .keyboard-open .balloon-targets .balloon-bomb span{color:#ff6276;font-size:4px}
+  .keyboard-open .balloon-targets .balloon-bomb strong{color:#c9bdcf;text-decoration-thickness:2px}
+  .keyboard-open .balloon-targets .balloon.matching{z-index:5;border-color:#fff;outline:2px dashed #fff;outline-offset:3px;filter:brightness(1.25);box-shadow:0 0 28px #fff,3px 5px 0 #070412}
+  .keyboard-open .balloon-targets .balloon-bomb.matching{border-color:#ff2946;outline-color:#ff2946;box-shadow:0 0 30px #ff2946,3px 5px 0 #070412}
+  .keyboard-open .balloon-targets .balloon:after{height:36px;bottom:-42px;opacity:.72}
+}
+
+@media(max-width:850px) and (max-height:560px){
+  .keyboard-open .balloon-targets .balloon{width:70px;min-width:70px;height:58px}
+  .keyboard-open .balloon-targets .balloon.long-target,.keyboard-open .balloon-targets .balloon.very-long-target{width:108px;min-width:108px;height:66px}
+  .keyboard-open .balloon-targets .balloon-giant{width:104px;min-width:104px;height:74px}
+}
