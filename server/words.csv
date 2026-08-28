@@ -1,0 +1,1001 @@
+﻿id,text,category,difficulty,char_count,source_type,enabled
+1,난리자베스,trend,2,5,trend-inspired,True
+2,야르,trend,1,2,trend-inspired,True
+3,할렐야루,trend,1,4,trend-inspired,True
+4,커터칼퇴근,trend,2,5,trend-inspired,True
+5,동결건조,trend,1,4,trend-inspired,True
+6,기대컨,trend,1,3,trend-inspired,True
+7,책없쾌,trend,1,3,trend-inspired,True
+8,깊대,trend,1,2,trend-inspired,True
+9,둠스크롤링,trend,2,5,trend-inspired,True
+10,도파밍,trend,1,3,trend-inspired,True
+11,감다살,trend,1,3,trend-inspired,True
+12,폼 미쳤다,trend,2,4,trend-inspired,True
+13,가보자고,trend,1,4,trend-inspired,True
+14,이건 못 참지,trend,3,5,trend-inspired,True
+15,오히려 좋아,trend,2,5,trend-inspired,True
+16,좋았어 자연스러웠어,trend,3,9,trend-inspired,True
+17,완전 럭키,trend,2,4,trend-inspired,True
+18,오늘도 레전드,trend,2,6,trend-inspired,True
+19,이게 되네,trend,2,4,trend-inspired,True
+20,이왜진,trend,1,3,trend-inspired,True
+21,갑자기 분위기,trend,2,6,trend-inspired,True
+22,진짜 최종,trend,2,4,trend-inspired,True
+23,최종의 최종,trend,2,5,trend-inspired,True
+24,소소하지만 확실한 행복,trend,3,10,trend-inspired,True
+25,일단 저장,trend,2,4,trend-inspired,True
+26,일단 캡처,trend,2,4,trend-inspired,True
+27,일단 가보자,trend,2,5,trend-inspired,True
+28,나만 알고 싶다,trend,3,6,trend-inspired,True
+29,제법인데,trend,1,4,trend-inspired,True
+30,이건 된다,trend,2,4,trend-inspired,True
+31,감 잡았다,trend,2,4,trend-inspired,True
+32,느낌 왔다,trend,2,4,trend-inspired,True
+33,바로 이거지,trend,2,5,trend-inspired,True
+34,이 맛이지,trend,2,4,trend-inspired,True
+35,성공적,trend,1,3,trend-inspired,True
+36,완벽했다,trend,1,4,trend-inspired,True
+37,대성공,trend,1,3,trend-inspired,True
+38,오늘 폼 좋다,trend,3,5,trend-inspired,True
+39,컨디션 최고,trend,2,5,trend-inspired,True
+40,타이밍 좋았다,trend,2,6,trend-inspired,True
+41,센스 있다,trend,2,4,trend-inspired,True
+42,이건 인정,trend,2,4,trend-inspired,True
+43,오늘도 해냈다,trend,2,6,trend-inspired,True
+44,슬슬 시동 건다,trend,3,6,trend-inspired,True
+45,제대로 시작한다,trend,2,7,trend-inspired,True
+46,집중 모드,trend,2,4,trend-inspired,True
+47,몰입 완료,trend,2,4,trend-inspired,True
+48,준비 완료,trend,2,4,trend-inspired,True
+49,출발합니다,trend,2,5,trend-inspired,True
+50,속도 붙었다,trend,2,5,trend-inspired,True
+51,리듬 탔다,trend,2,4,trend-inspired,True
+52,손 풀렸다,trend,2,4,trend-inspired,True
+53,감각 살아났다,trend,2,6,trend-inspired,True
+54,오늘 느낌 좋다,trend,3,6,trend-inspired,True
+55,한 번 더 간다,trend,3,5,trend-inspired,True
+56,이번엔 진짜다,trend,2,6,trend-inspired,True
+57,침착하게 가자,trend,2,6,trend-inspired,True
+58,끝까지 간다,trend,2,5,trend-inspired,True
+59,아직 안 끝났다,trend,3,6,trend-inspired,True
+60,역전 가보자,trend,2,5,trend-inspired,True
+61,막판 스퍼트,trend,2,5,trend-inspired,True
+62,한 끗 차이,trend,3,4,trend-inspired,True
+63,아슬아슬 성공,trend,2,6,trend-inspired,True
+64,간발의 차이,trend,2,5,trend-inspired,True
+65,눈치 게임 시작,trend,3,6,trend-inspired,True
+66,먼저 잡았다,trend,2,5,trend-inspired,True
+67,내가 찜했다,trend,2,5,trend-inspired,True
+68,이건 내 거,trend,3,4,trend-inspired,True
+69,선점 완료,trend,2,4,trend-inspired,True
+70,빠르게 캐치,trend,2,5,trend-inspired,True
+71,캐치 성공,trend,2,4,trend-inspired,True
+72,콤보 시작,trend,2,4,trend-inspired,True
+73,콤보 유지,trend,2,4,trend-inspired,True
+74,콤보 폭발,trend,2,4,trend-inspired,True
+75,기세 좋다,trend,2,4,trend-inspired,True
+76,흐름 좋다,trend,2,4,trend-inspired,True
+77,페이스 좋다,trend,2,5,trend-inspired,True
+78,집중력 상승,trend,2,5,trend-inspired,True
+79,순간 포착,trend,2,4,trend-inspired,True
+80,정확히 입력,trend,2,5,trend-inspired,True
+81,고양이,word,1,3,original,True
+82,강아지,word,1,3,original,True
+83,햄스터,word,1,3,original,True
+84,토끼,word,1,2,original,True
+85,여우,word,1,2,original,True
+86,판다,word,1,2,original,True
+87,수달,word,1,2,original,True
+88,펭귄,word,1,2,original,True
+89,돌고래,word,1,3,original,True
+90,기린,word,1,2,original,True
+91,얼룩말,word,1,3,original,True
+92,다람쥐,word,1,3,original,True
+93,붕어빵,word,1,3,original,True
+94,호떡,word,1,2,original,True
+95,떡볶이,word,1,3,original,True
+96,김밥,word,1,2,original,True
+97,라면,word,1,2,original,True
+98,만두,word,1,2,original,True
+99,우동,word,1,2,original,True
+100,냉면,word,1,2,original,True
+101,비빔밥,word,1,3,original,True
+102,김치전,word,1,3,original,True
+103,핫도그,word,1,3,original,True
+104,샌드위치,word,1,4,original,True
+105,초콜릿,word,1,3,original,True
+106,마카롱,word,1,3,original,True
+107,푸딩,word,1,2,original,True
+108,젤리,word,1,2,original,True
+109,쿠키,word,1,2,original,True
+110,도넛,word,1,2,original,True
+111,케이크,word,1,3,original,True
+112,아이스크림,word,2,5,original,True
+113,딸기,word,1,2,original,True
+114,복숭아,word,1,3,original,True
+115,수박,word,1,2,original,True
+116,포도,word,1,2,original,True
+117,커피,word,1,2,original,True
+118,라테,word,1,2,original,True
+119,주스,word,1,2,original,True
+120,레모네이드,word,2,5,original,True
+121,탄산수,word,1,3,original,True
+122,우유,word,1,2,original,True
+123,요구르트,word,1,4,original,True
+124,보리차,word,1,3,original,True
+125,물방울,word,1,3,original,True
+126,눈사람,word,1,3,original,True
+127,무지개,word,1,3,original,True
+128,별빛,word,1,2,original,True
+129,달빛,word,1,2,original,True
+130,햇살,word,1,2,original,True
+131,노을,word,1,2,original,True
+132,구름,word,1,2,original,True
+133,바람,word,1,2,original,True
+134,소나기,word,1,3,original,True
+135,첫눈,word,1,2,original,True
+136,파도,word,1,2,original,True
+137,모래성,word,1,3,original,True
+138,숲길,word,1,2,original,True
+139,꽃길,word,1,2,original,True
+140,지하철,word,1,3,original,True
+141,버스,word,1,2,original,True
+142,택시,word,1,2,original,True
+143,자전거,word,1,3,original,True
+144,기차,word,1,2,original,True
+145,비행기,word,1,3,original,True
+146,횡단보도,word,1,4,original,True
+147,정류장,word,1,3,original,True
+148,운동장,word,1,3,original,True
+149,놀이터,word,1,3,original,True
+150,도서관,word,1,3,original,True
+151,미술관,word,1,3,original,True
+152,키보드,word,1,3,original,True
+153,마우스,word,1,3,original,True
+154,모니터,word,1,3,original,True
+155,이어폰,word,1,3,original,True
+156,스피커,word,1,3,original,True
+157,충전기,word,1,3,original,True
+158,노트북,word,1,3,original,True
+159,스마트폰,word,1,4,original,True
+160,카메라,word,1,3,original,True
+161,리모컨,word,1,3,original,True
+162,알람,word,1,2,original,True
+163,메모장,word,1,3,original,True
+164,게임,word,1,2,original,True
+165,퀘스트,word,1,3,original,True
+166,보너스,word,1,3,original,True
+167,콤보,word,1,2,original,True
+168,미션,word,1,2,original,True
+169,스테이지,word,1,4,original,True
+170,레벨업,word,1,3,original,True
+171,아이템,word,1,3,original,True
+172,보물상자,word,1,4,original,True
+173,체크포인트,word,2,5,original,True
+174,스피드,word,1,3,original,True
+175,타이밍,word,1,3,original,True
+176,출발,word,1,2,original,True
+177,도착,word,1,2,original,True
+178,성공,word,1,2,original,True
+179,도전,word,1,2,original,True
+180,집중,word,1,2,original,True
+181,정확,word,1,2,original,True
+182,순간,word,1,2,original,True
+183,반전,word,1,2,original,True
+184,역전,word,1,2,original,True
+185,승부,word,1,2,original,True
+186,기회,word,1,2,original,True
+187,행운,word,1,2,original,True
+188,우당탕탕,word,1,4,original,True
+189,알쏭달쏭,word,1,4,original,True
+190,아슬아슬,word,1,4,original,True
+191,두근두근,word,1,4,original,True
+192,반짝반짝,word,1,4,original,True
+193,말랑말랑,word,1,4,original,True
+194,폭신폭신,word,1,4,original,True
+195,바삭바삭,word,1,4,original,True
+196,쫀득쫀득,word,1,4,original,True
+197,보글보글,word,1,4,original,True
+198,빙글빙글,word,1,4,original,True
+199,폴짝폴짝,word,1,4,original,True
+200,살금살금,word,1,4,original,True
+201,쌩쌩,word,1,2,original,True
+202,씽씽,word,1,2,original,True
+203,슝슝,word,1,2,original,True
+204,톡톡,word,1,2,original,True
+205,팡팡,word,1,2,original,True
+206,찰칵,word,1,2,original,True
+207,딩동,word,1,2,original,True
+208,짜잔,word,1,2,original,True
+209,두둥,word,1,2,original,True
+210,오늘 뭐 먹지,curated,3,5,original,True
+211,점심 메뉴 고민 중,curated,3,7,original,True
+212,퇴근까지 조금만 더,curated,3,8,original,True
+213,주말이 기다려진다,curated,3,8,original,True
+214,집에 가고 싶다,curated,3,6,original,True
+215,배고프면 집중이 안 된다,curated,3,10,original,True
+216,커피가 필요한 시간,curated,3,8,original,True
+217,간식 먹고 다시 시작,curated,3,8,original,True
+218,오늘 날씨 정말 좋다,curated,3,8,original,True
+219,우산 챙기는 걸 깜빡했다,curated,3,10,original,True
+220,충전기를 두고 왔다,curated,3,8,original,True
+221,이어폰이 어디 갔지,curated,3,8,original,True
+222,분명 여기 뒀는데,curated,3,7,original,True
+223,한 번만 더 확인하자,curated,3,8,original,True
+224,메모해두길 잘했다,curated,3,8,original,True
+225,생각보다 금방 끝났다,curated,3,9,original,True
+226,조금 늦어도 괜찮아,curated,3,8,original,True
+227,오늘 할 일은 오늘 끝내자,curated,3,10,original,True
+228,좋은 생각이 떠올랐다,curated,3,9,original,True
+229,갑자기 여행 가고 싶다,curated,3,9,original,True
+230,창밖을 보니 노을이 예쁘다,curated,3,11,original,True
+231,바람이 시원하게 분다,curated,3,9,original,True
+232,따뜻한 차가 생각난다,curated,3,9,original,True
+233,붕어빵은 머리부터 먹을까,curated,3,11,original,True
+234,민트초코는 어려운 문제다,curated,3,11,original,True
+235,라면 물 맞추기가 제일 어렵다,curated,3,12,original,True
+236,치킨은 언제나 좋은 선택,curated,3,10,original,True
+237,떡볶이에는 튀김이 필요하다,curated,3,12,original,True
+238,김밥 한 줄이면 든든하다,curated,3,10,original,True
+239,냉면은 여름에 더 맛있다,curated,3,10,original,True
+240,아이스크림이 녹기 시작했다,curated,3,12,original,True
+241,정답은 가까이에 있다,curated,3,9,original,True
+242,힌트를 하나 발견했다,curated,3,9,original,True
+243,왼쪽을 먼저 확인해,curated,3,8,original,True
+244,오른쪽에 뭔가 있다,curated,3,8,original,True
+245,뒤를 조심해,curated,2,5,original,True
+246,지금이 바로 기회다,curated,3,8,original,True
+247,다음 목표를 찾아라,curated,3,8,original,True
+248,이번 목표는 내가 잡는다,curated,3,10,original,True
+249,먼저 입력하면 내 점수,curated,3,9,original,True
+250,정확도가 속도보다 중요하다,curated,3,12,original,True
+251,빠르고 정확하게 입력,curated,3,9,original,True
+252,한 글자도 놓치지 마,curated,3,8,original,True
+253,오타 없이 끝까지,curated,3,7,original,True
+254,손가락 준비 완료,curated,3,7,original,True
+255,키보드 준비 완료,curated,3,7,original,True
+256,삼 초 뒤에 시작합니다,curated,3,9,original,True
+257,하나 둘 셋 출발,curated,3,6,original,True
+258,마지막 십 초 남았다,curated,3,8,original,True
+259,역전은 지금부터다,curated,3,8,original,True
+260,끝날 때까지 끝난 게 아니다,curated,3,11,original,True
+261,접시를 정확히 맞혀라,curated,3,9,original,True
+262,풍선을 먼저 터뜨려라,curated,3,9,original,True
+263,보물을 찾아 문을 열어라,curated,3,10,original,True
+264,좀비가 가까이 다가온다,curated,3,10,original,True
+265,레이스 선두를 따라잡아라,curated,3,11,original,True
+266,왕관을 끝까지 지켜라,curated,3,9,original,True
+267,보스의 약점을 찾아라,curated,3,9,original,True
+268,팀원과 힘을 합쳐라,curated,3,8,original,True
+269,체크포인트를 통과했다,curated,3,10,original,True
+270,숨겨진 보너스를 찾았다,curated,3,10,original,True
+271,새 기록에 도전한다,curated,3,8,original,True
+272,최고 기록을 갈아치웠다,curated,3,10,original,True
+273,오늘의 기록을 저장했다,curated,3,10,original,True
+274,다음 라운드를 준비한다,curated,3,10,original,True
+275,새로운 상대가 입장했다,curated,3,10,original,True
+276,관전자가 들어왔다,curated,3,8,original,True
+277,게임이 곧 시작된다,curated,3,8,original,True
+278,대기실이 거의 찼다,curated,3,8,original,True
+279,친구가 방에 들어왔다,curated,3,9,original,True
+280,준비 버튼을 눌러주세요,curated,3,10,original,True
+281,모두 준비가 끝났다,curated,3,8,original,True
+282,이번 판은 속도전이다,curated,3,9,original,True
+283,이번 판은 정확도 승부,curated,3,9,original,True
+284,이번에는 긴 문장이다,curated,3,9,original,True
+285,짧은 단어가 쏟아진다,curated,3,9,original,True
+286,단어가 갑자기 사라졌다,curated,3,10,original,True
+287,새 단어가 나타났다,curated,3,8,original,True
+288,같은 단어를 노리고 있다,curated,3,10,original,True
+289,간발의 차이로 먼저 잡았다,curated,3,11,original,True
+290,선점에 성공했다,curated,2,7,original,True
+291,콤보가 끊기지 않는다,curated,3,9,original,True
+292,연속 성공 보너스,curated,3,7,original,True
+293,먹물이 화면을 가렸다,curated,3,9,original,True
+294,글자가 잠깐 흐려졌다,curated,3,9,original,True
+295,방해 효과가 시작됐다,curated,3,9,original,True
+296,방해 효과가 끝났다,curated,3,8,original,True
+297,다시 시야가 선명해졌다,curated,3,10,original,True
+298,침착하면 따라잡을 수 있다,curated,3,11,original,True
+299,속도보다 오타를 조심해,curated,3,10,original,True
+300,긴장하지 말고 입력해,curated,3,9,original,True
+301,눈에 들어오는 단어부터,curated,3,10,original,True
+302,욕심내면 오타가 난다,curated,3,9,original,True
+303,상대가 노리는 단어를 봐,curated,3,10,original,True
+304,빈틈을 놓치지 마,curated,3,7,original,True
+305,새 목표가 바로 채워졌다,curated,3,10,original,True
+306,오늘도 즐겁게 시작,curated,3,8,original,True
+307,가볍게 한 판 어때,curated,3,7,original,True
+308,친구와 같이 해보자,curated,3,8,original,True
+309,이번에는 누가 이길까,curated,3,9,original,True
+310,결과는 마지막에 알 수 있다,curated,3,11,original,True
+311,잘 치는 사람보다 침착한 사람이 강하다,curated,4,16,original,True
+312,빠른 손보다 빠른 판단이 필요하다,curated,4,14,original,True
+313,어떤 단어를 고를지가 중요하다,curated,4,13,original,True
+314,쉬운 단어를 먼저 잡을까,curated,3,10,original,True
+315,긴 문장에 도전해볼까,curated,3,9,original,True
+316,점수가 높은 목표를 노려라,curated,3,11,original,True
+317,지금은 콤보를 지킬 시간,curated,3,10,original,True
+318,마지막 한 글자까지 정확하게,curated,3,12,original,True
+319,눈과 손의 호흡이 중요하다,curated,3,11,original,True
+320,한순간에 순위가 뒤집힌다,curated,3,11,original,True
+321,작은 실수가 큰 차이를 만든다,curated,3,12,original,True
+322,성 앞에서 탐험가가 달려간다,sentence,3,12,original,True
+323,공원에서 우주인이 사라진다,sentence,3,12,original,True
+324,공원에서 로봇이 사라진다,sentence,3,11,original,True
+325,성 앞에서 우주인이 다가온다,sentence,3,12,original,True
+326,로봇이 다가온다,short_sentence,2,7,original,True
+327,지금은 조금 쉬었다 가자,daily,3,10,original,True
+328,강아지가 달려간다,short_sentence,3,8,original,True
+329,사진 한 장만 찍으려 했는데 웃음이 먼저 터졌다,fun,5,19,original,True
+330,성 앞에서 로봇이 춤을 춘다,sentence,3,11,original,True
+331,성 앞에서 다람쥐가 반짝인다,sentence,3,12,original,True
+332,놀이터에서 펭귄이 반짝인다,sentence,3,12,original,True
+333,이번에는 좋은 것부터 해보자,daily,3,12,original,True
+334,빠르게 재미있게 놀아보자,daily,3,11,original,True
+335,잠깐 기분 좋게 시작하자,daily,3,10,original,True
+336,정류장에서 고양이가 달려간다,sentence,4,13,original,True
+337,햇살이 문을 연다,short_sentence,3,7,original,True
+338,운동장에서 탐험가가 반짝인다,sentence,4,13,original,True
+339,바닷가에서 마법사가 날아간다,sentence,4,13,original,True
+340,보물섬에서 토끼가 반짝인다,sentence,3,12,original,True
+341,옥상에서 마법사가 달려간다,sentence,3,12,original,True
+342,보물섬에서 토끼가 춤을 춘다,sentence,3,12,original,True
+343,옥상에서 고양이가 굴러간다,sentence,3,12,original,True
+344,퇴근하면 오늘 계획을 세워보자,daily,4,13,original,True
+345,빠르게 오늘 계획을 세워보자,daily,3,12,original,True
+346,탐험가가 다가온다,short_sentence,3,8,original,True
+347,별빛이 달려간다,short_sentence,2,7,original,True
+348,이번에는 끝까지 집중하자,daily,3,11,original,True
+349,일단 간식부터 챙기자,daily,3,9,original,True
+350,구름 위에서 강아지가 춤을 춘다,sentence,4,13,original,True
+351,한 입만 먹으려고 했는데 집중력이 돌아왔다,fun,4,18,original,True
+352,공원에서 토끼가 사라진다,sentence,3,11,original,True
+353,보너스가 등장했다 순간을 놓치지 말자,game,4,16,original,True
+354,성 앞에서 고양이가 다가온다,sentence,3,12,original,True
+355,보물섬에서 고양이가 점프한다,sentence,4,13,original,True
+356,우주인이 신호를 기다린다,short_sentence,3,11,original,True
+357,퇴근하면 음악을 들어보자,daily,3,11,original,True
+358,기차가 점프한다,short_sentence,2,7,original,True
+359,우주선에서 우주인이 반짝인다,sentence,4,13,original,True
+360,버스가 달려간다,short_sentence,2,7,original,True
+361,도서관에서 토끼가 춤을 춘다,sentence,3,12,original,True
+362,공원에서 펭귄이 굴러간다,sentence,3,11,original,True
+363,구름 위에서 펭귄이 날아간다,sentence,3,12,original,True
+364,운동장에서 친구가 다가온다,sentence,3,12,original,True
+365,옥상에서 토끼가 달려간다,sentence,3,11,original,True
+366,운동장에서 강아지가 사라진다,sentence,4,13,original,True
+367,버스가 춤을 춘다,short_sentence,3,7,original,True
+368,사진 한 장만 찍으려 했는데 간식이 나를 기다린다,fun,5,20,original,True
+369,골목길에서 강아지가 점프한다,sentence,4,13,original,True
+370,조용히 지나가려 했는데 시간이 순간이동했다,fun,5,19,original,True
+371,골목길에서 우주인이 사라진다,sentence,4,13,original,True
+372,바닷가에서 강아지가 사라진다,sentence,4,13,original,True
+373,바닷가에서 친구가 점프한다,sentence,3,12,original,True
+374,고양이가 빠르게 움직인다,short_sentence,3,11,original,True
+375,도서관에서 친구가 굴러간다,sentence,3,12,original,True
+376,접시가 손을 흔든다,short_sentence,3,8,original,True
+377,숲속에서 토끼가 다가온다,sentence,3,11,original,True
+378,놀이터에서 강아지가 다가온다,sentence,4,13,original,True
+379,카운트다운이 시작됐다 콤보를 계속 이어가자,game,5,19,original,True
+380,정류장에서 마법사가 다가온다,sentence,4,13,original,True
+381,숲속에서 강아지가 굴러간다,sentence,3,12,original,True
+382,성 앞에서 토끼가 반짝인다,sentence,3,11,original,True
+383,구름이 보물을 찾는다,short_sentence,3,9,original,True
+384,옥상에서 토끼가 점프한다,sentence,3,11,original,True
+385,딱 하나만 사려고 했는데 손가락이 먼저 움직였다,fun,5,20,original,True
+386,숲속에서 강아지가 사라진다,sentence,3,12,original,True
+387,다음 스테이지가 시작됐다 다음 목표를 준비하자,game,5,20,original,True
+388,점심에는 창문을 열어보자,daily,3,11,original,True
+389,새로운 길이 열렸다 한 번에 성공해보자,game,4,16,original,True
+390,오락실에서 강아지가 춤을 춘다,sentence,4,13,original,True
+391,우주인이 갑자기 멈춘다,short_sentence,3,10,original,True
+392,강아지가 출발을 준비한다,short_sentence,3,11,original,True
+393,공원에서 펭귄이 춤을 춘다,sentence,3,11,original,True
+394,일단 책 한 장 읽어보자,daily,3,9,original,True
+395,성 앞에서 로봇이 굴러간다,sentence,3,11,original,True
+396,달빛 아래서 다람쥐가 춤을 춘다,sentence,4,13,original,True
+397,알람이 손을 흔든다,short_sentence,3,8,original,True
+398,기차가 달려간다,short_sentence,2,7,original,True
+399,한 입만 먹으려고 했는데 웃음이 먼저 터졌다,fun,4,18,original,True
+400,달빛 아래서 펭귄이 달려간다,sentence,3,12,original,True
+401,도서관에서 펭귄이 사라진다,sentence,3,12,original,True
+402,준비가 되면 끝까지 집중하자,daily,3,12,original,True
+403,구름 위에서 우주인이 달려간다,sentence,4,13,original,True
+404,새로운 길이 열렸다 정확하게 입력하자,game,4,16,original,True
+405,다음 스테이지가 시작됐다 정확하게 입력하자,game,5,19,original,True
+406,오락실에서 마법사가 날아간다,sentence,4,13,original,True
+407,놀이터에서 친구가 춤을 춘다,sentence,3,12,original,True
+408,우주선에서 고양이가 다가온다,sentence,4,13,original,True
+409,구름 위에서 탐험가가 날아간다,sentence,4,13,original,True
+410,조용히 마지막까지 가보자,daily,3,11,original,True
+411,아침부터 간식부터 챙기자,daily,3,11,original,True
+412,보물섬에서 펭귄이 날아간다,sentence,3,12,original,True
+413,잠깐 간식부터 챙기자,daily,3,9,original,True
+414,마법사가 반짝인다,short_sentence,3,8,original,True
+415,옥상에서 토끼가 사라진다,sentence,3,11,original,True
+416,오락실에서 우주인이 다가온다,sentence,4,13,original,True
+417,정류장에서 친구가 날아간다,sentence,3,12,original,True
+418,놀이터에서 우주인이 달려간다,sentence,4,13,original,True
+419,분명 방금까지 있었는데 간식이 나를 기다린다,fun,5,19,original,True
+420,바닷가에서 로봇이 점프한다,sentence,3,12,original,True
+421,구름 위에서 토끼가 반짝인다,sentence,3,12,original,True
+422,옥상에서 친구가 달려간다,sentence,3,11,original,True
+423,성 앞에서 탐험가가 점프한다,sentence,3,12,original,True
+424,로봇이 보물을 찾는다,short_sentence,3,9,original,True
+425,옥상에서 고양이가 다가온다,sentence,3,12,original,True
+426,공원에서 탐험가가 날아간다,sentence,3,12,original,True
+427,바닷가에서 탐험가가 춤을 춘다,sentence,4,13,original,True
+428,공원에서 우주인이 굴러간다,sentence,3,12,original,True
+429,놀이터에서 고양이가 춤을 춘다,sentence,4,13,original,True
+430,냉장고를 열었는데 계획이 살짝 바뀌었다,fun,4,17,original,True
+431,빠르게 창문을 열어보자,daily,3,10,original,True
+432,풍선이 떠오른다 콤보를 계속 이어가자,game,4,16,original,True
+433,알람이 사라진다,short_sentence,2,7,original,True
+434,보물섬에서 친구가 굴러간다,sentence,3,12,original,True
+435,도서관에서 토끼가 달려간다,sentence,3,12,original,True
+436,구름 위에서 펭귄이 춤을 춘다,sentence,3,12,original,True
+437,고양이가 사라진다,short_sentence,3,8,original,True
+438,우주인이 사라진다,short_sentence,3,8,original,True
+439,지금은 기분 좋게 시작하자,daily,3,11,original,True
+440,가볍게 맛있는 거 먹자,daily,3,9,original,True
+441,숲속에서 마법사가 굴러간다,sentence,3,12,original,True
+442,우주인이 달려간다,short_sentence,3,8,original,True
+443,정류장에서 로봇이 점프한다,sentence,3,12,original,True
+444,기차역에서 탐험가가 날아간다,sentence,4,13,original,True
+445,운동장에서 마법사가 달려간다,sentence,4,13,original,True
+446,마법사가 길을 찾는다,short_sentence,3,9,original,True
+447,한 입만 먹으려고 했는데 갑자기 배가 고파졌다,fun,5,19,original,True
+448,공원에서 토끼가 달려간다,sentence,3,11,original,True
+449,알람이 길을 찾는다,short_sentence,3,8,original,True
+450,보물섬에서 강아지가 날아간다,sentence,4,13,original,True
+451,기차역에서 마법사가 달려간다,sentence,4,13,original,True
+452,보물상자가 나타났다 침착하게 타이밍을 잡아라,game,5,20,original,True
+453,구름 위에서 강아지가 사라진다,sentence,4,13,original,True
+454,골목길에서 친구가 점프한다,sentence,3,12,original,True
+455,지금은 음악을 들어보자,daily,3,10,original,True
+456,도서관에서 마법사가 굴러간다,sentence,4,13,original,True
+457,우주선에서 친구가 반짝인다,sentence,3,12,original,True
+458,바닷가에서 다람쥐가 점프한다,sentence,4,13,original,True
+459,놀이터에서 친구가 달려간다,sentence,3,12,original,True
+460,빠르게 기분 좋게 시작하자,daily,3,11,original,True
+461,옥상에서 다람쥐가 날아간다,sentence,3,12,original,True
+462,공원에서 다람쥐가 춤을 춘다,sentence,3,12,original,True
+463,퇴근하면 커피 한 잔 마시자,daily,3,11,original,True
+464,성 앞에서 고양이가 달려간다,sentence,3,12,original,True
+465,성 앞에서 강아지가 달려간다,sentence,3,12,original,True
+466,바닷가에서 탐험가가 반짝인다,sentence,4,13,original,True
+467,구름 위에서 마법사가 날아간다,sentence,4,13,original,True
+468,오락실에서 마법사가 달려간다,sentence,4,13,original,True
+469,도서관에서 우주인이 반짝인다,sentence,4,13,original,True
+470,숲속에서 고양이가 다가온다,sentence,3,12,original,True
+471,달빛 아래서 마법사가 점프한다,sentence,4,13,original,True
+472,달빛 아래서 다람쥐가 굴러간다,sentence,4,13,original,True
+473,일단 음악을 들어보자,daily,3,9,original,True
+474,보너스가 등장했다 정확하게 입력하자,game,4,16,original,True
+475,옥상에서 우주인이 춤을 춘다,sentence,3,12,original,True
+476,마법사가 달려간다,short_sentence,3,8,original,True
+477,기차역에서 친구가 굴러간다,sentence,3,12,original,True
+478,알람이 높이 뛰어오른다,short_sentence,3,10,original,True
+479,펭귄이 다가온다,short_sentence,2,7,original,True
+480,놀이터에서 다람쥐가 날아간다,sentence,4,13,original,True
+481,콤보가 이어진다 빠르게 다음 목표를 찾아라,game,4,18,original,True
+482,기차역에서 고양이가 점프한다,sentence,4,13,original,True
+483,잠깐 책 한 장 읽어보자,daily,3,9,original,True
+484,바닷가에서 친구가 춤을 춘다,sentence,3,12,original,True
+485,마지막 판이라고 했는데 승부욕이 깨어났다,fun,4,18,original,True
+486,택배가 반짝인다,short_sentence,2,7,original,True
+487,오늘은 산책하러 가자,daily,3,9,original,True
+488,운동장에서 토끼가 반짝인다,sentence,3,12,original,True
+489,기차역에서 마법사가 춤을 춘다,sentence,4,13,original,True
+490,레이스가 시작된다 먼저 잡아라,game,4,13,original,True
+491,택배가 높이 뛰어오른다,short_sentence,3,10,original,True
+492,운동장에서 토끼가 사라진다,sentence,3,12,original,True
+493,보너스가 등장했다 먼저 잡아라,game,4,13,original,True
+494,운동장에서 강아지가 반짝인다,sentence,4,13,original,True
+495,준비가 되면 좋은 것부터 해보자,daily,4,13,original,True
+496,공원에서 펭귄이 반짝인다,sentence,3,11,original,True
+497,로봇이 갑자기 멈춘다,short_sentence,3,9,original,True
+498,성 앞에서 다람쥐가 춤을 춘다,sentence,3,12,original,True
+499,기차역에서 마법사가 다가온다,sentence,4,13,original,True
+500,옥상에서 토끼가 굴러간다,sentence,3,11,original,True
+501,옥상에서 우주인이 날아간다,sentence,3,12,original,True
+502,공원에서 펭귄이 사라진다,sentence,3,11,original,True
+503,별빛이 높이 뛰어오른다,short_sentence,3,10,original,True
+504,정류장에서 탐험가가 반짝인다,sentence,4,13,original,True
+505,바닷가에서 다람쥐가 굴러간다,sentence,4,13,original,True
+506,탐험가가 반짝인다,short_sentence,3,8,original,True
+507,골목길에서 토끼가 춤을 춘다,sentence,3,12,original,True
+508,보물섬에서 다람쥐가 달려간다,sentence,4,13,original,True
+509,기차가 다가온다,short_sentence,2,7,original,True
+510,저녁에는 창문을 열어보자,daily,3,11,original,True
+511,바닷가에서 로봇이 사라진다,sentence,3,12,original,True
+512,주말에는 가볍게 몸을 풀자,daily,3,11,original,True
+513,바닷가에서 다람쥐가 춤을 춘다,sentence,4,13,original,True
+514,바닷가에서 친구가 사라진다,sentence,3,12,original,True
+515,토끼가 굴러간다,short_sentence,2,7,original,True
+516,잠깐 눈을 감았는데 손가락이 먼저 움직였다,fun,4,18,original,True
+517,보물섬에서 우주인이 사라진다,sentence,4,13,original,True
+518,달빛 아래서 친구가 점프한다,sentence,3,12,original,True
+519,준비가 되면 사진 한 장 찍자,daily,3,11,original,True
+520,정류장에서 마법사가 사라진다,sentence,4,13,original,True
+521,기차역에서 우주인이 반짝인다,sentence,4,13,original,True
+522,우주선에서 강아지가 반짝인다,sentence,4,13,original,True
+523,도서관에서 친구가 날아간다,sentence,3,12,original,True
+524,공원에서 강아지가 달려간다,sentence,3,12,original,True
+525,신나게 기분 좋게 시작하자,daily,3,11,original,True
+526,도서관에서 펭귄이 반짝인다,sentence,3,12,original,True
+527,펭귄이 달려간다,short_sentence,2,7,original,True
+528,우주인이 손을 흔든다,short_sentence,3,9,original,True
+529,공원에서 로봇이 날아간다,sentence,3,11,original,True
+530,목표를 발견했다 한 번에 성공해보자,game,4,15,original,True
+531,아침부터 맛있는 거 먹자,daily,3,10,original,True
+532,퇴근하면 마지막까지 가보자,daily,3,12,original,True
+533,정류장에서 고양이가 굴러간다,sentence,4,13,original,True
+534,저녁에는 커피 한 잔 마시자,daily,3,11,original,True
+535,숲속에서 강아지가 점프한다,sentence,3,12,original,True
+536,다음 스테이지가 시작됐다 빠르게 다음 목표를 찾아라,game,5,22,original,True
+537,집에 가면 음악을 들어보자,daily,3,11,original,True
+538,다람쥐가 사라진다,short_sentence,3,8,original,True
+539,우주선에서 다람쥐가 날아간다,sentence,4,13,original,True
+540,기차역에서 다람쥐가 달려간다,sentence,4,13,original,True
+541,펭귄이 높이 뛰어오른다,short_sentence,3,10,original,True
+542,보너스가 등장했다 빠르게 다음 목표를 찾아라,game,5,19,original,True
+543,운동장에서 토끼가 달려간다,sentence,3,12,original,True
+544,이번에는 가볍게 몸을 풀자,daily,3,11,original,True
+545,놀이터에서 고양이가 날아간다,sentence,4,13,original,True
+546,오락실에서 마법사가 굴러간다,sentence,4,13,original,True
+547,숲속에서 친구가 달려간다,sentence,3,11,original,True
+548,정류장에서 마법사가 점프한다,sentence,4,13,original,True
+549,주말에는 기분 좋게 시작하자,daily,3,12,original,True
+550,한 입만 먹으려고 했는데 할 일이 하나 더 생겼다,fun,5,19,original,True
+551,성 앞에서 강아지가 점프한다,sentence,3,12,original,True
+552,골목길에서 친구가 달려간다,sentence,3,12,original,True
+553,우주선에서 강아지가 날아간다,sentence,4,13,original,True
+554,운동장에서 다람쥐가 사라진다,sentence,4,13,original,True
+555,숲속에서 펭귄이 굴러간다,sentence,3,11,original,True
+556,성 앞에서 다람쥐가 점프한다,sentence,3,12,original,True
+557,구름이 살금살금 다가온다,short_sentence,3,11,original,True
+558,보물섬에서 마법사가 굴러간다,sentence,4,13,original,True
+559,풍선이 살금살금 다가온다,short_sentence,3,11,original,True
+560,딱 하나만 사려고 했는데 간식이 나를 기다린다,fun,5,19,original,True
+561,별빛이 빠르게 움직인다,short_sentence,3,10,original,True
+562,게임이 끝나면 조금 쉬었다 가자,daily,4,13,original,True
+563,다음 스테이지가 시작됐다 콤보를 계속 이어가자,game,5,20,original,True
+564,기차역에서 토끼가 달려간다,sentence,3,12,original,True
+565,놀이터에서 강아지가 날아간다,sentence,4,13,original,True
+566,도서관에서 고양이가 날아간다,sentence,4,13,original,True
+567,햇살이 사라진다,short_sentence,2,7,original,True
+568,점심에는 오늘 계획을 세워보자,daily,4,13,original,True
+569,구름 위에서 마법사가 춤을 춘다,sentence,4,13,original,True
+570,퇴근하면 맛있는 거 먹자,daily,3,10,original,True
+571,기차역에서 로봇이 사라진다,sentence,3,12,original,True
+572,달빛 아래서 펭귄이 사라진다,sentence,3,12,original,True
+573,분명 방금까지 있었는데 집중력이 돌아왔다,fun,4,18,original,True
+574,달빛 아래서 펭귄이 날아간다,sentence,3,12,original,True
+575,바닷가에서 고양이가 다가온다,sentence,4,13,original,True
+576,탐험가가 신호를 기다린다,short_sentence,3,11,original,True
+577,공원에서 강아지가 굴러간다,sentence,3,12,original,True
+578,주말에는 다시 도전해보자,daily,3,11,original,True
+579,탐험가가 빙글빙글 돈다,short_sentence,3,10,original,True
+580,숨겨진 문이 열렸다 한 번에 성공해보자,game,4,16,original,True
+581,바람이 손을 흔든다,short_sentence,3,8,original,True
+582,숲속에서 로봇이 날아간다,sentence,3,11,original,True
+583,기차역에서 로봇이 날아간다,sentence,3,12,original,True
+584,운동장에서 친구가 반짝인다,sentence,3,12,original,True
+585,오락실에서 다람쥐가 사라진다,sentence,4,13,original,True
+586,오늘은 오늘 계획을 세워보자,daily,3,12,original,True
+587,성 앞에서 토끼가 굴러간다,sentence,3,11,original,True
+588,햇살이 높이 뛰어오른다,short_sentence,3,10,original,True
+589,도서관에서 다람쥐가 날아간다,sentence,4,13,original,True
+590,토끼가 길을 찾는다,short_sentence,3,8,original,True
+591,운동장에서 다람쥐가 굴러간다,sentence,4,13,original,True
+592,기차역에서 우주인이 달려간다,sentence,4,13,original,True
+593,숲속에서 펭귄이 점프한다,sentence,3,11,original,True
+594,별빛이 사라진다,short_sentence,2,7,original,True
+595,택배가 날아간다,short_sentence,2,7,original,True
+596,오락실에서 펭귄이 다가온다,sentence,3,12,original,True
+597,성 앞에서 토끼가 달려간다,sentence,3,11,original,True
+598,탐험가가 굴러간다,short_sentence,3,8,original,True
+599,옥상에서 탐험가가 점프한다,sentence,3,12,original,True
+600,숲속에서 우주인이 날아간다,sentence,3,12,original,True
+601,성 앞에서 탐험가가 날아간다,sentence,3,12,original,True
+602,공원에서 다람쥐가 점프한다,sentence,3,12,original,True
+603,풍선이 날아간다,short_sentence,2,7,original,True
+604,정류장에서 마법사가 날아간다,sentence,4,13,original,True
+605,옥상에서 강아지가 굴러간다,sentence,3,12,original,True
+606,옥상에서 펭귄이 달려간다,sentence,3,11,original,True
+607,풍선이 굴러간다,short_sentence,2,7,original,True
+608,탐험가가 점프한다,short_sentence,3,8,original,True
+609,달빛 아래서 토끼가 날아간다,sentence,3,12,original,True
+610,골목길에서 강아지가 다가온다,sentence,4,13,original,True
+611,바닷가에서 강아지가 날아간다,sentence,4,13,original,True
+612,우주선에서 친구가 다가온다,sentence,3,12,original,True
+613,잠깐 눈을 감았는데 시간이 순간이동했다,fun,4,17,original,True
+614,접시가 달려간다,short_sentence,2,7,original,True
+615,골목길에서 우주인이 다가온다,sentence,4,13,original,True
+616,분명 쉬운 줄 알았는데 또 한 판이 시작됐다,fun,4,17,original,True
+617,보너스가 등장했다 마지막까지 집중하자,game,4,17,original,True
+618,정류장에서 고양이가 사라진다,sentence,4,13,original,True
+619,우주선에서 마법사가 점프한다,sentence,4,13,original,True
+620,알람을 껐다고 생각했는데 승부욕이 깨어났다,fun,5,19,original,True
+621,강아지가 갑자기 멈춘다,short_sentence,3,10,original,True
+622,토끼가 보물을 찾는다,short_sentence,3,9,original,True
+623,접시가 사라진다,short_sentence,2,7,original,True
+624,알람이 신호를 기다린다,short_sentence,3,10,original,True
+625,알람을 껐다고 생각했는데 계획이 살짝 바뀌었다,fun,5,20,original,True
+626,기차역에서 강아지가 다가온다,sentence,4,13,original,True
+627,숲속에서 토끼가 점프한다,sentence,3,11,original,True
+628,게임이 끝나면 사진 한 장 찍자,daily,3,12,original,True
+629,마지막 기회가 남았다 정확하게 입력하자,game,4,17,original,True
+630,운동장에서 펭귄이 점프한다,sentence,3,12,original,True
+631,마법사가 빠르게 움직인다,short_sentence,3,11,original,True
+632,오락실에서 강아지가 굴러간다,sentence,4,13,original,True
+633,다람쥐가 손을 흔든다,short_sentence,3,9,original,True
+634,마법사가 빙글빙글 돈다,short_sentence,3,10,original,True
+635,달빛 아래서 강아지가 반짝인다,sentence,4,13,original,True
+636,숲속에서 로봇이 달려간다,sentence,3,11,original,True
+637,성 앞에서 토끼가 춤을 춘다,sentence,3,11,original,True
+638,우주선에서 친구가 굴러간다,sentence,3,12,original,True
+639,오락실에서 강아지가 날아간다,sentence,4,13,original,True
+640,성 앞에서 강아지가 다가온다,sentence,3,12,original,True
+641,달빛 아래서 로봇이 달려간다,sentence,3,12,original,True
+642,햇살이 손을 흔든다,short_sentence,3,8,original,True
+643,숲속에서 마법사가 다가온다,sentence,3,12,original,True
+644,아침부터 책 한 장 읽어보자,daily,3,11,original,True
+645,숲속에서 강아지가 다가온다,sentence,3,12,original,True
+646,도서관에서 다람쥐가 사라진다,sentence,4,13,original,True
+647,우주선에서 펭귄이 굴러간다,sentence,3,12,original,True
+648,알람이 문을 연다,short_sentence,3,7,original,True
+649,새로운 길이 열렸다 마지막까지 집중하자,game,4,17,original,True
+650,공원에서 친구가 다가온다,sentence,3,11,original,True
+651,구름 위에서 마법사가 달려간다,sentence,4,13,original,True
+652,오락실에서 우주인이 춤을 춘다,sentence,4,13,original,True
+653,오락실에서 토끼가 반짝인다,sentence,3,12,original,True
+654,보물섬에서 친구가 춤을 춘다,sentence,3,12,original,True
+655,기차역에서 우주인이 다가온다,sentence,4,13,original,True
+656,점심에는 재미있게 놀아보자,daily,3,12,original,True
+657,역전 기회가 왔다 침착하게 타이밍을 잡아라,game,4,18,original,True
+658,지금은 사진 한 장 찍자,daily,3,9,original,True
+659,도서관에서 펭귄이 굴러간다,sentence,3,12,original,True
+660,보물섬에서 탐험가가 달려간다,sentence,4,13,original,True
+661,집에 가면 창문을 열어보자,daily,3,11,original,True
+662,바닷가에서 펭귄이 점프한다,sentence,3,12,original,True
+663,일단 맛있는 거 먹자,daily,3,8,original,True
+664,운동장에서 친구가 굴러간다,sentence,3,12,original,True
+665,집에 가면 재미있게 놀아보자,daily,3,12,original,True
+666,구름이 빙글빙글 돈다,short_sentence,3,9,original,True
+667,토끼가 반짝인다,short_sentence,2,7,original,True
+668,천천히 간식부터 챙기자,daily,3,10,original,True
+669,카운트다운이 시작됐다 먼저 잡아라,game,4,15,original,True
+670,기차역에서 친구가 다가온다,sentence,3,12,original,True
+671,기차역에서 펭귄이 날아간다,sentence,3,12,original,True
+672,역전 기회가 왔다 먼저 잡아라,game,3,12,original,True
+673,우주선에서 고양이가 점프한다,sentence,4,13,original,True
+674,분명 쉬운 줄 알았는데 배터리가 먼저 지쳤다,fun,4,18,original,True
+675,달빛 아래서 친구가 달려간다,sentence,3,12,original,True
+676,성 앞에서 친구가 사라진다,sentence,3,11,original,True
+677,성 앞에서 친구가 달려간다,sentence,3,11,original,True
+678,탐험가가 사라진다,short_sentence,3,8,original,True
+679,공원에서 마법사가 날아간다,sentence,3,12,original,True
+680,오락실에서 고양이가 점프한다,sentence,4,13,original,True
+681,운동장에서 고양이가 사라진다,sentence,4,13,original,True
+682,친구가 갑자기 멈춘다,short_sentence,3,9,original,True
+683,구름이 갑자기 멈춘다,short_sentence,3,9,original,True
+684,알람이 빠르게 움직인다,short_sentence,3,10,original,True
+685,새로운 길이 열렸다 끝까지 놓치지 마라,game,4,16,original,True
+686,게임이 끝나면 간식부터 챙기자,daily,4,13,original,True
+687,도서관에서 마법사가 춤을 춘다,sentence,4,13,original,True
+688,조용히 지나가려 했는데 간식이 나를 기다린다,fun,5,19,original,True
+689,잠깐 눈을 감았는데 할 일이 하나 더 생겼다,fun,4,17,original,True
+690,알람이 다가온다,short_sentence,2,7,original,True
+691,옥상에서 강아지가 점프한다,sentence,3,12,original,True
+692,게임이 끝나면 커피 한 잔 마시자,daily,4,13,original,True
+693,조용히 할 일을 끝내자,daily,3,9,original,True
+694,분명 쉬운 줄 알았는데 집중력이 돌아왔다,fun,4,17,original,True
+695,놀이터에서 고양이가 다가온다,sentence,4,13,original,True
+696,도서관에서 토끼가 반짝인다,sentence,3,12,original,True
+697,바닷가에서 고양이가 굴러간다,sentence,4,13,original,True
+698,골목길에서 강아지가 굴러간다,sentence,4,13,original,True
+699,정류장에서 다람쥐가 달려간다,sentence,4,13,original,True
+700,도서관에서 탐험가가 다가온다,sentence,4,13,original,True
+701,우주선에서 다람쥐가 점프한다,sentence,4,13,original,True
+702,집에 가면 기분 좋게 시작하자,daily,3,12,original,True
+703,천천히 조금 쉬었다 가자,daily,3,10,original,True
+704,가볍게 시작했는데 할 일이 하나 더 생겼다,fun,4,17,original,True
+705,버스가 높이 뛰어오른다,short_sentence,3,10,original,True
+706,보물섬에서 고양이가 춤을 춘다,sentence,4,13,original,True
+707,택배가 사라진다,short_sentence,2,7,original,True
+708,오락실에서 강아지가 반짝인다,sentence,4,13,original,True
+709,달빛 아래서 친구가 다가온다,sentence,3,12,original,True
+710,기차역에서 탐험가가 춤을 춘다,sentence,4,13,original,True
+711,놀이터에서 친구가 날아간다,sentence,3,12,original,True
+712,구름 위에서 펭귄이 반짝인다,sentence,3,12,original,True
+713,마지막 판이라고 했는데 갑자기 배가 고파졌다,fun,5,19,original,True
+714,가볍게 시작했는데 계획이 살짝 바뀌었다,fun,4,17,original,True
+715,오락실에서 고양이가 굴러간다,sentence,4,13,original,True
+716,숲속에서 펭귄이 반짝인다,sentence,3,11,original,True
+717,도서관에서 로봇이 사라진다,sentence,3,12,original,True
+718,놀이터에서 강아지가 사라진다,sentence,4,13,original,True
+719,냉장고를 열었는데 고양이와 눈이 마주쳤다,fun,4,18,original,True
+720,보물섬에서 펭귄이 춤을 춘다,sentence,3,12,original,True
+721,도서관에서 고양이가 춤을 춘다,sentence,4,13,original,True
+722,고양이가 신호를 기다린다,short_sentence,3,11,original,True
+723,오락실에서 마법사가 점프한다,sentence,4,13,original,True
+724,택배가 출발을 준비한다,short_sentence,3,10,original,True
+725,빠르게 마지막까지 가보자,daily,3,11,original,True
+726,오락실에서 탐험가가 달려간다,sentence,4,13,original,True
+727,친구가 춤을 춘다,short_sentence,3,7,original,True
+728,햇살이 빠르게 움직인다,short_sentence,3,10,original,True
+729,토끼가 문을 연다,short_sentence,3,7,original,True
+730,접시가 빙글빙글 돈다,short_sentence,3,9,original,True
+731,한 입만 먹으려고 했는데 계획이 살짝 바뀌었다,fun,5,19,original,True
+732,골목길에서 토끼가 점프한다,sentence,3,12,original,True
+733,운동장에서 로봇이 굴러간다,sentence,3,12,original,True
+734,구름 위에서 고양이가 날아간다,sentence,4,13,original,True
+735,도서관에서 강아지가 점프한다,sentence,4,13,original,True
+736,기차가 버튼을 누른다,short_sentence,3,9,original,True
+737,우주선에서 다람쥐가 춤을 춘다,sentence,4,13,original,True
+738,주말에는 할 일을 끝내자,daily,3,10,original,True
+739,오락실에서 친구가 춤을 춘다,sentence,3,12,original,True
+740,택배가 달려간다,short_sentence,2,7,original,True
+741,역전 기회가 왔다 빠르게 다음 목표를 찾아라,game,4,18,original,True
+742,햇살이 반짝인다,short_sentence,2,7,original,True
+743,점심에는 산책하러 가자,daily,3,10,original,True
+744,기차역에서 로봇이 굴러간다,sentence,3,12,original,True
+745,새로운 길이 열렸다 다음 목표를 준비하자,game,4,17,original,True
+746,골목길에서 로봇이 날아간다,sentence,3,12,original,True
+747,옥상에서 고양이가 달려간다,sentence,3,12,original,True
+748,보물섬에서 친구가 달려간다,sentence,3,12,original,True
+749,우주선에서 탐험가가 반짝인다,sentence,4,13,original,True
+750,딱 하나만 사려고 했는데 갑자기 배가 고파졌다,fun,5,19,original,True
+751,조용히 지나가려 했는데 승부욕이 깨어났다,fun,4,18,original,True
+752,구름 위에서 강아지가 달려간다,sentence,4,13,original,True
+753,우주선에서 로봇이 달려간다,sentence,3,12,original,True
+754,사진 한 장만 찍으려 했는데 집중력이 돌아왔다,fun,5,19,original,True
+755,달빛 아래서 토끼가 다가온다,sentence,3,12,original,True
+756,보너스가 등장했다 다음 목표를 준비하자,game,4,17,original,True
+757,보물섬에서 로봇이 굴러간다,sentence,3,12,original,True
+758,버스가 날아간다,short_sentence,2,7,original,True
+759,신나게 할 일을 끝내자,daily,3,9,original,True
+760,도서관에서 로봇이 다가온다,sentence,3,12,original,True
+761,골목길에서 탐험가가 사라진다,sentence,4,13,original,True
+762,골목길에서 탐험가가 굴러간다,sentence,4,13,original,True
+763,정류장에서 우주인이 달려간다,sentence,4,13,original,True
+764,속도가 붙기 시작했다 빠르게 다음 목표를 찾아라,game,5,20,original,True
+765,가볍게 한 번 더 해보자,daily,3,9,original,True
+766,정류장에서 탐험가가 굴러간다,sentence,4,13,original,True
+767,운동장에서 로봇이 달려간다,sentence,3,12,original,True
+768,지금은 천천히 생각해보자,daily,3,11,original,True
+769,숲속에서 마법사가 사라진다,sentence,3,12,original,True
+770,우주선에서 펭귄이 달려간다,sentence,3,12,original,True
+771,도서관에서 탐험가가 춤을 춘다,sentence,4,13,original,True
+772,바람이 빙글빙글 돈다,short_sentence,3,9,original,True
+773,바닷가에서 강아지가 달려간다,sentence,4,13,original,True
+774,기차역에서 마법사가 점프한다,sentence,4,13,original,True
+775,속도가 붙기 시작했다 마지막까지 집중하자,game,4,18,original,True
+776,기차가 반짝인다,short_sentence,2,7,original,True
+777,풍선이 버튼을 누른다,short_sentence,3,9,original,True
+778,가볍게 시작했는데 웃음이 먼저 터졌다,fun,4,16,original,True
+779,접시가 날아온다 끝까지 놓치지 마라,game,4,15,original,True
+780,가볍게 시작했는데 배터리가 먼저 지쳤다,fun,4,17,original,True
+781,바닷가에서 고양이가 춤을 춘다,sentence,4,13,original,True
+782,접시가 신호를 기다린다,short_sentence,3,10,original,True
+783,가볍게 천천히 생각해보자,daily,3,11,original,True
+784,도서관에서 로봇이 반짝인다,sentence,3,12,original,True
+785,천천히 산책하러 가자,daily,3,9,original,True
+786,강아지가 굴러간다,short_sentence,3,8,original,True
+787,놀이터에서 친구가 점프한다,sentence,3,12,original,True
+788,정류장에서 강아지가 반짝인다,sentence,4,13,original,True
+789,펭귄이 반짝인다,short_sentence,2,7,original,True
+790,저녁에는 사진 한 장 찍자,daily,3,10,original,True
+791,점심에는 조금 쉬었다 가자,daily,3,11,original,True
+792,지금은 맛있는 거 먹자,daily,3,9,original,True
+793,신나게 한 번 더 해보자,daily,3,9,original,True
+794,달빛 아래서 친구가 반짝인다,sentence,3,12,original,True
+795,집에 가면 한 번 더 해보자,daily,3,10,original,True
+796,골목길에서 다람쥐가 점프한다,sentence,4,13,original,True
+797,오락실에서 탐험가가 다가온다,sentence,4,13,original,True
+798,펭귄이 버튼을 누른다,short_sentence,3,9,original,True
+799,오락실에서 우주인이 굴러간다,sentence,4,13,original,True
+800,숲속에서 토끼가 굴러간다,sentence,3,11,original,True
+801,기차가 보물을 찾는다,short_sentence,3,9,original,True
+802,운동장에서 친구가 달려간다,sentence,3,12,original,True
+803,기차역에서 우주인이 춤을 춘다,sentence,4,13,original,True
+804,로봇이 날아간다,short_sentence,2,7,original,True
+805,마법사가 살금살금 다가온다,short_sentence,3,12,original,True
+806,지금은 다시 도전해보자,daily,3,10,original,True
+807,친구가 버튼을 누른다,short_sentence,3,9,original,True
+808,구름이 길을 찾는다,short_sentence,3,8,original,True
+809,기차역에서 펭귄이 사라진다,sentence,3,12,original,True
+810,정류장에서 강아지가 사라진다,sentence,4,13,original,True
+811,공원에서 탐험가가 다가온다,sentence,3,12,original,True
+812,오늘은 일찍 자려고 했는데 계획이 살짝 바뀌었다,fun,5,20,original,True
+813,기차역에서 강아지가 춤을 춘다,sentence,4,13,original,True
+814,게임이 끝나면 음악을 들어보자,daily,4,13,original,True
+815,놀이터에서 고양이가 굴러간다,sentence,4,13,original,True
+816,사진 한 장만 찍으려 했는데 또 한 판이 시작됐다,fun,5,19,original,True
+817,아침부터 사진 한 장 찍자,daily,3,10,original,True
+818,도서관에서 우주인이 다가온다,sentence,4,13,original,True
+819,보물섬에서 고양이가 날아간다,sentence,4,13,original,True
+820,접시가 버튼을 누른다,short_sentence,3,9,original,True
+821,옥상에서 강아지가 달려간다,sentence,3,12,original,True
+822,골목길에서 다람쥐가 사라진다,sentence,4,13,original,True
+823,아침부터 커피 한 잔 마시자,daily,3,11,original,True
+824,보물섬에서 로봇이 날아간다,sentence,3,12,original,True
+825,달빛 아래서 고양이가 굴러간다,sentence,4,13,original,True
+826,옥상에서 고양이가 춤을 춘다,sentence,3,12,original,True
+827,정류장에서 친구가 반짝인다,sentence,3,12,original,True
+828,성 앞에서 우주인이 반짝인다,sentence,3,12,original,True
+829,달빛 아래서 탐험가가 반짝인다,sentence,4,13,original,True
+830,정류장에서 펭귄이 굴러간다,sentence,3,12,original,True
+831,구름이 버튼을 누른다,short_sentence,3,9,original,True
+832,놀이터에서 로봇이 점프한다,sentence,3,12,original,True
+833,알람을 껐다고 생각했는데 배터리가 먼저 지쳤다,fun,5,20,original,True
+834,놀이터에서 친구가 다가온다,sentence,3,12,original,True
+835,기차역에서 탐험가가 점프한다,sentence,4,13,original,True
+836,구름 위에서 친구가 날아간다,sentence,3,12,original,True
+837,지금은 할 일을 끝내자,daily,3,9,original,True
+838,잠깐 할 일을 끝내자,daily,3,8,original,True
+839,천천히 재미있게 놀아보자,daily,3,11,original,True
+840,알람을 껐다고 생각했는데 손가락이 먼저 움직였다,fun,5,21,original,True
+841,놀이터에서 마법사가 날아간다,sentence,4,13,original,True
+842,옥상에서 친구가 반짝인다,sentence,3,11,original,True
+843,운동장에서 탐험가가 굴러간다,sentence,4,13,original,True
+844,성 앞에서 우주인이 달려간다,sentence,3,12,original,True
+845,로봇이 높이 뛰어오른다,short_sentence,3,10,original,True
+846,알람이 버튼을 누른다,short_sentence,3,9,original,True
+847,구름 위에서 우주인이 날아간다,sentence,4,13,original,True
+848,퇴근하면 좋은 것부터 해보자,daily,3,12,original,True
+849,옥상에서 토끼가 날아간다,sentence,3,11,original,True
+850,구름이 신호를 기다린다,short_sentence,3,10,original,True
+851,숲속에서 펭귄이 사라진다,sentence,3,11,original,True
+852,게임이 끝나면 맛있는 거 먹자,daily,3,12,original,True
+853,탐험가가 출발을 준비한다,short_sentence,3,11,original,True
+854,정류장에서 펭귄이 달려간다,sentence,3,12,original,True
+855,딱 하나만 사려고 했는데 시간이 순간이동했다,fun,5,19,original,True
+856,로봇이 빠르게 움직인다,short_sentence,3,10,original,True
+857,놀이터에서 강아지가 반짝인다,sentence,4,13,original,True
+858,점심에는 가볍게 몸을 풀자,daily,3,11,original,True
+859,신나게 천천히 생각해보자,daily,3,11,original,True
+860,달빛 아래서 우주인이 사라진다,sentence,4,13,original,True
+861,옥상에서 탐험가가 춤을 춘다,sentence,3,12,original,True
+862,보물섬에서 친구가 날아간다,sentence,3,12,original,True
+863,지금은 오늘 계획을 세워보자,daily,3,12,original,True
+864,숲속에서 우주인이 사라진다,sentence,3,12,original,True
+865,이번에는 조금 쉬었다 가자,daily,3,11,original,True
+866,운동장에서 고양이가 반짝인다,sentence,4,13,original,True
+867,운동장에서 친구가 사라진다,sentence,3,12,original,True
+868,마법사가 높이 뛰어오른다,short_sentence,3,11,original,True
+869,오락실에서 펭귄이 사라진다,sentence,3,12,original,True
+870,택배가 신호를 기다린다,short_sentence,3,10,original,True
+871,놀이터에서 친구가 사라진다,sentence,3,12,original,True
+872,우주선에서 로봇이 점프한다,sentence,3,12,original,True
+873,숲속에서 우주인이 점프한다,sentence,3,12,original,True
+874,오락실에서 토끼가 춤을 춘다,sentence,3,12,original,True
+875,접시가 갑자기 멈춘다,short_sentence,3,9,original,True
+876,운동장에서 우주인이 사라진다,sentence,4,13,original,True
+877,탐험가가 갑자기 멈춘다,short_sentence,3,10,original,True
+878,버스가 버튼을 누른다,short_sentence,3,9,original,True
+879,공원에서 친구가 굴러간다,sentence,3,11,original,True
+880,옥상에서 친구가 사라진다,sentence,3,11,original,True
+881,옥상에서 마법사가 춤을 춘다,sentence,3,12,original,True
+882,공원에서 강아지가 날아간다,sentence,3,12,original,True
+883,잠깐 천천히 생각해보자,daily,3,10,original,True
+884,마법사가 다가온다,short_sentence,3,8,original,True
+885,천천히 좋은 것부터 해보자,daily,3,11,original,True
+886,토끼가 버튼을 누른다,short_sentence,3,9,original,True
+887,운동장에서 토끼가 춤을 춘다,sentence,3,12,original,True
+888,오락실에서 로봇이 다가온다,sentence,3,12,original,True
+889,정류장에서 다람쥐가 춤을 춘다,sentence,4,13,original,True
+890,성 앞에서 로봇이 반짝인다,sentence,3,11,original,True
+891,골목길에서 로봇이 다가온다,sentence,3,12,original,True
+892,숲속에서 다람쥐가 반짝인다,sentence,3,12,original,True
+893,한 입만 먹으려고 했는데 승부욕이 깨어났다,fun,4,18,original,True
+894,보물섬에서 다람쥐가 날아간다,sentence,4,13,original,True
+895,퇴근하면 산책하러 가자,daily,3,10,original,True
+896,정류장에서 펭귄이 춤을 춘다,sentence,3,12,original,True
+897,숲속에서 로봇이 사라진다,sentence,3,11,original,True
+898,잠깐 사진 한 장 찍자,daily,3,8,original,True
+899,마법사가 점프한다,short_sentence,3,8,original,True
+900,기차역에서 친구가 점프한다,sentence,3,12,original,True
+901,오락실에서 마법사가 사라진다,sentence,4,13,original,True
+902,도서관에서 토끼가 굴러간다,sentence,3,12,original,True
+903,저녁에는 한 번 더 해보자,daily,3,10,original,True
+904,강아지가 보물을 찾는다,short_sentence,3,10,original,True
+905,도서관에서 탐험가가 반짝인다,sentence,4,13,original,True
+906,운동장에서 로봇이 날아간다,sentence,3,12,original,True
+907,아침부터 끝까지 집중하자,daily,3,11,original,True
+908,골목길에서 마법사가 점프한다,sentence,4,13,original,True
+909,도서관에서 우주인이 점프한다,sentence,4,13,original,True
+910,토끼가 살금살금 다가온다,short_sentence,3,11,original,True
+911,바닷가에서 펭귄이 춤을 춘다,sentence,3,12,original,True
+912,숲속에서 펭귄이 다가온다,sentence,3,11,original,True
+913,기차역에서 친구가 달려간다,sentence,3,12,original,True
+914,보물섬에서 고양이가 사라진다,sentence,4,13,original,True
+915,옥상에서 펭귄이 점프한다,sentence,3,11,original,True
+916,우주선에서 다람쥐가 사라진다,sentence,4,13,original,True
+917,성 앞에서 우주인이 날아간다,sentence,3,12,original,True
+918,신나게 조금 쉬었다 가자,daily,3,10,original,True
+919,도서관에서 친구가 점프한다,sentence,3,12,original,True
+920,풍선이 문을 연다,short_sentence,3,7,original,True
+921,햇살이 살금살금 다가온다,short_sentence,3,11,original,True
+922,구름 위에서 다람쥐가 날아간다,sentence,4,13,original,True
+923,운동장에서 친구가 점프한다,sentence,3,12,original,True
+924,분명 쉬운 줄 알았는데 간식이 나를 기다린다,fun,4,18,original,True
+925,보물섬에서 강아지가 달려간다,sentence,4,13,original,True
+926,분명 쉬운 줄 알았는데 승부욕이 깨어났다,fun,4,17,original,True
+927,접시가 보물을 찾는다,short_sentence,3,9,original,True
+928,놀이터에서 강아지가 굴러간다,sentence,4,13,original,True
+929,별빛이 손을 흔든다,short_sentence,3,8,original,True
+930,기차역에서 로봇이 다가온다,sentence,3,12,original,True
+931,토끼가 빙글빙글 돈다,short_sentence,3,9,original,True
+932,바닷가에서 탐험가가 사라진다,sentence,4,13,original,True
+933,구름 위에서 다람쥐가 점프한다,sentence,4,13,original,True
+934,달빛 아래서 강아지가 달려간다,sentence,4,13,original,True
+935,달빛 아래서 다람쥐가 점프한다,sentence,4,13,original,True
+936,점심에는 마지막까지 가보자,daily,3,12,original,True
+937,공원에서 로봇이 춤을 춘다,sentence,3,11,original,True
+938,조용히 맛있는 거 먹자,daily,3,9,original,True
+939,보물상자가 나타났다 한 번에 성공해보자,game,4,17,original,True
+940,빠르게 간식부터 챙기자,daily,3,10,original,True
+941,우주인이 반짝인다,short_sentence,3,8,original,True
+942,우주선에서 펭귄이 다가온다,sentence,3,12,original,True
+943,숲속에서 마법사가 날아간다,sentence,3,12,original,True
+944,정류장에서 친구가 다가온다,sentence,3,12,original,True
+945,펭귄이 빙글빙글 돈다,short_sentence,3,9,original,True
+946,우주선에서 토끼가 반짝인다,sentence,3,12,original,True
+947,숲속에서 탐험가가 다가온다,sentence,3,12,original,True
+948,성 앞에서 다람쥐가 날아간다,sentence,3,12,original,True
+949,보물섬에서 다람쥐가 굴러간다,sentence,4,13,original,True
+950,공원에서 탐험가가 춤을 춘다,sentence,3,12,original,True
+951,마법사가 사라진다,short_sentence,3,8,original,True
+952,놀이터에서 로봇이 다가온다,sentence,3,12,original,True
+953,강아지가 춤을 춘다,short_sentence,3,8,original,True
+954,천천히 사진 한 장 찍자,daily,3,9,original,True
+955,옥상에서 펭귄이 굴러간다,sentence,3,11,original,True
+956,준비가 되면 음악을 들어보자,daily,3,12,original,True
+957,놀이터에서 우주인이 날아간다,sentence,4,13,original,True
+958,버스가 빠르게 움직인다,short_sentence,3,10,original,True
+959,로봇이 길을 찾는다,short_sentence,3,8,original,True
+960,옥상에서 토끼가 다가온다,sentence,3,11,original,True
+961,바닷가에서 고양이가 사라진다,sentence,4,13,original,True
+962,집에 가면 사진 한 장 찍자,daily,3,10,original,True
+963,바닷가에서 우주인이 날아간다,sentence,4,13,original,True
+964,놀이터에서 다람쥐가 반짝인다,sentence,4,13,original,True
+965,운동장에서 강아지가 다가온다,sentence,4,13,original,True
+966,우주선에서 탐험가가 굴러간다,sentence,4,13,original,True
+967,별이 쏟아진다 끝까지 놓치지 마라,game,4,14,original,True
+968,옥상에서 친구가 다가온다,sentence,3,11,original,True
+969,달빛 아래서 로봇이 춤을 춘다,sentence,3,12,original,True
+970,속도가 붙기 시작했다 다음 목표를 준비하자,game,4,18,original,True
+971,달빛 아래서 로봇이 굴러간다,sentence,3,12,original,True
+972,숲속에서 로봇이 다가온다,sentence,3,11,original,True
+973,운동장에서 강아지가 굴러간다,sentence,4,13,original,True
+974,접시가 날아온다 순간을 놓치지 말자,game,4,15,original,True
+975,탐험가가 달려간다,short_sentence,3,8,original,True
+976,기차역에서 강아지가 달려간다,sentence,4,13,original,True
+977,운동장에서 다람쥐가 점프한다,sentence,4,13,original,True
+978,별이 쏟아진다 빠르게 다음 목표를 찾아라,game,4,17,original,True
+979,공원에서 친구가 춤을 춘다,sentence,3,11,original,True
+980,속도가 붙기 시작했다 한 번에 성공해보자,game,4,17,original,True
+981,우주인이 빠르게 움직인다,short_sentence,3,11,original,True
+982,빠르게 끝까지 집중하자,daily,3,10,original,True
+983,달빛 아래서 로봇이 점프한다,sentence,3,12,original,True
+984,골목길에서 강아지가 달려간다,sentence,4,13,original,True
+985,토끼가 날아간다,short_sentence,2,7,original,True
+986,공원에서 강아지가 점프한다,sentence,3,12,original,True
+987,토끼가 높이 뛰어오른다,short_sentence,3,10,original,True
+988,풍선이 높이 뛰어오른다,short_sentence,3,10,original,True
+989,오늘은 일찍 자려고 했는데 할 일이 하나 더 생겼다,fun,5,20,original,True
+990,기차역에서 다람쥐가 춤을 춘다,sentence,4,13,original,True
+991,접시가 날아온다 정확하게 입력하자,game,4,15,original,True
+992,구름이 빠르게 움직인다,short_sentence,3,10,original,True
+993,우주선에서 친구가 점프한다,sentence,3,12,original,True
+994,성 앞에서 다람쥐가 다가온다,sentence,3,12,original,True
+995,공원에서 마법사가 사라진다,sentence,3,12,original,True
+996,이번에는 간식부터 챙기자,daily,3,11,original,True
+997,성 앞에서 친구가 다가온다,sentence,3,11,original,True
+998,정류장에서 펭귄이 다가온다,sentence,3,12,original,True
+999,달빛 아래서 펭귄이 점프한다,sentence,3,12,original,True
+1000,바람이 살금살금 다가온다,short_sentence,3,11,original,True

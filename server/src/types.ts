@@ -25,6 +25,11 @@ export interface PlayerState {
   combo: number;
 }
 
+export interface SpectatorState {
+  id: string;
+  name: string;
+}
+
 export type SubmissionOutcome = "success" | "claimed" | "miss";
 
 export type ServerEvent =
@@ -44,6 +49,7 @@ export interface PublicRoom {
   modeState?: ModeState;
   targets: Target[];
   players: PlayerState[];
+  spectators: SpectatorState[];
 }
 
 export interface RoomSummary {
@@ -51,6 +57,8 @@ export interface RoomSummary {
   mode: GameMode;
   status: RoomStatus;
   playerCount: number;
+  spectatorCount: number;
   maxPlayers: number;
   hostName: string;
+  endsAt: number | null;
 }

@@ -25,7 +25,7 @@ const demoTarget = (mode: GameMode, index: number): Target => {
 }
 const starterTargets = (mode: GameMode): Target[] => WORDS.slice(0, 5).map((text, i) => ({ ...demoTarget(mode, i), text }))
 const roomFromUrl = () => new URLSearchParams(window.location.search).get('room')?.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) ?? ''
-const emptyRoom = (): MatchState => ({ roomCode: '', mode: 'grab', phase: 'lobby', targets: [], players: [] })
+const emptyRoom = (): MatchState => ({ roomCode: '', mode: 'grab', phase: 'lobby', targets: [], players: [], spectators: [] })
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home')
@@ -103,7 +103,7 @@ function App() {
       setCreatePickerOpen(false)
       setExpiredRoomCode('')
       setScreen(next.phase === 'playing' ? 'game' : next.phase === 'finished' ? 'result' : 'lobby')
-      if (next.phase === 'playing') window.setTimeout(() => inputRef.current?.focus(), 50)
+      if (next.phase === 'playing' && !next.spectators.some(spectator => spectator.id === playerId)) window.setTimeout(() => inputRef.current?.focus(), 50)
     } else if (message.type === 'submission_result') {
       if (message.playerId === playerId) {
         setToast(message.outcome === 'success' ? { text: `${gameMode === 'zombie' ? 'ZAP' : gameMode === 'shoot' ? 'BANG' : gameMode === 'balloon' ? message.scoreDelta < 0 ? 'BOMB' : 'POP' : 'CATCH'}! ${message.scoreDelta >= 0 ? '+' : ''}${message.scoreDelta}`, tone: message.scoreDelta < 0 ? 'bad' : 'good' } : message.outcome === 'claimed' ? { text: '한발 늦었어요!', tone: 'info' } : { text: 'MISS!', tone: 'bad' })
@@ -221,7 +221,7 @@ function App() {
     if (!send(message)) connect(message)
   }
   const startDemo = (mode: GameMode = 'grab') => {
-    setGameMode(mode); setDemo(true); setPlayerId('me'); setState({ roomCode: mode === 'shoot' ? 'RANGE' : mode === 'zombie' ? 'BASE01' : mode === 'balloon' ? 'POPPOP' : mode === 'racing' ? 'RACE01' : mode === 'treasure' ? 'LOOT01' : 'PIXEL', mode, phase: 'lobby', targets: [], modeState: mode === 'zombie' ? { baseHealth: 100, wave: 1, teamKills: 0 } : mode === 'racing' ? { trackLength: 100, race: { me: { distance: 0, nitro: 0 }, bot: { distance: 0, nitro: 0 } } } : mode === 'treasure' ? { treasure: { me: { keys: 0, maps: 0 }, bot: { keys: 0, maps: 0 } } } : undefined, players: [{ id: 'me', nickname: nickname.trim() || 'PLAYER 1', score: 0, combo: 0 }, { id: 'bot', nickname: mode === 'zombie' ? 'MEDIC.K' : mode === 'balloon' ? 'BUBBLE.K' : mode === 'treasure' ? 'RUBY.K' : 'TURBO.K', score: 0, combo: 0 }] }); setScreen('lobby')
+    setGameMode(mode); setDemo(true); setPlayerId('me'); setState({ roomCode: mode === 'shoot' ? 'RANGE' : mode === 'zombie' ? 'BASE01' : mode === 'balloon' ? 'POPPOP' : mode === 'racing' ? 'RACE01' : mode === 'treasure' ? 'LOOT01' : 'PIXEL', mode, phase: 'lobby', targets: [], modeState: mode === 'zombie' ? { baseHealth: 100, wave: 1, teamKills: 0 } : mode === 'racing' ? { trackLength: 100, race: { me: { distance: 0, nitro: 0 }, bot: { distance: 0, nitro: 0 } } } : mode === 'treasure' ? { treasure: { me: { keys: 0, maps: 0 }, bot: { keys: 0, maps: 0 } } } : undefined, players: [{ id: 'me', nickname: nickname.trim() || 'PLAYER 1', score: 0, combo: 0 }, { id: 'bot', nickname: mode === 'zombie' ? 'MEDIC.K' : mode === 'balloon' ? 'BUBBLE.K' : mode === 'treasure' ? 'RUBY.K' : 'TURBO.K', score: 0, combo: 0 }], spectators: [] }); setScreen('lobby')
   }
   const leaveInvite = () => {
     setInviteRoomCode(''); setRoomInput(''); setExpiredRoomCode(''); setNicknameRequired(false)
@@ -301,6 +301,7 @@ function App() {
 
   const sorted = useMemo(() => [...state.players].sort((a, b) => gameMode === 'racing' ? (state.modeState?.race?.[b.id]?.distance ?? 0) - (state.modeState?.race?.[a.id]?.distance ?? 0) || b.score - a.score : b.score - a.score), [gameMode, state.modeState?.race, state.players])
   const me = state.players.find(p => p.id === playerId) ?? sorted[0]
+  const isSpectator = state.spectators.some(spectator => spectator.id === playerId)
   const prefixMatches = (target: Target) => !!input && target.text.startsWith(input)
   const hasNickname = nickname.trim().length > 0
 
@@ -341,7 +342,7 @@ function App() {
         <div className="code-room-card"><small>ROOM CODE</small><h2>코드로 참가</h2><p>친구에게 받은 6자리 코드를 입력하세요.</p><div className="join-row"><input maxLength={6} value={roomInput} onChange={e => { setRoomInput(e.target.value.toUpperCase()); setExpiredRoomCode('') }} placeholder="예: A1B2C3" /><button onClick={() => enterRoom('join')}>참가</button></div></div>
       </section>
       {createPickerOpen && <section className="create-picker" role="dialog" aria-modal="true" aria-labelledby="create-picker-title"><div className="create-picker-panel"><div className="create-picker-head"><div><small>SELECT GAME</small><h2 id="create-picker-title">어떤 게임을 할까요?</h2></div><button onClick={() => setCreatePickerOpen(false)} aria-label="방 만들기 닫기">×</button></div><div className="game-picker" aria-label="게임 선택">{(['grab', 'shoot', 'zombie', 'balloon', 'racing', 'treasure'] as GameMode[]).map(mode => <button key={mode} className={selectedMode === mode ? 'selected' : ''} onClick={() => setSelectedMode(mode)}><i>{MODE_INFO[mode].number}</i><strong>{MODE_INFO[mode].label}</strong><small>{MODE_INFO[mode].description}</small></button>)}</div><button className="primary create-confirm" onClick={() => enterRoom('create')}>{MODE_INFO[selectedMode].label} 방 만들기 <kbd>↵</kbd></button></div></section>}
-      <section className="public-rooms"><div className="public-rooms-head"><div><small>NOW WAITING</small><h2>참가 가능한 방 <span>{rooms.length}</span></h2></div><div className={`connection ${status}`}>● {status === 'online' ? '실시간 연결됨' : '서버 연결 중'}</div><button onClick={() => send({ type: 'list_rooms' })}>↻ 새로고침</button></div><div className="public-room-list">{rooms.length === 0 ? <div className="empty-rooms"><strong>아직 열린 방이 없어요</strong><span>첫 번째 방을 만들어 친구를 초대해 보세요.</span></div> : rooms.map(room => <button className="public-room" key={room.id} onClick={() => joinListedRoom(room)}><span className={`mode-badge ${room.mode}`}>{MODE_INFO[room.mode].badge}</span><span className="public-room-info"><b>{MODE_INFO[room.mode].label}</b><small>{room.hostName}의 방 · {room.id}</small></span><em>{room.playerCount}/{room.maxPlayers}</em><strong>참가 →</strong></button>)}</div></section>
+      <section className="public-rooms"><div className="public-rooms-head"><div><small>LIVE ROOMS</small><h2>공개 게임방 <span>{rooms.length}</span></h2></div><div className={`connection ${status}`}>● {status === 'online' ? '실시간 연결됨' : '서버 연결 중'}</div><button onClick={() => send({ type: 'list_rooms' })}>↻ 새로고침</button></div><div className="public-room-list">{rooms.length === 0 ? <div className="empty-rooms"><strong>아직 열린 방이 없어요</strong><span>첫 번째 방을 만들어 친구를 초대해 보세요.</span></div> : rooms.map(room => <button className={`public-room ${room.status === 'playing' ? 'is-playing' : ''}`} key={room.id} onClick={() => joinListedRoom(room)}><span className={`mode-badge ${room.mode}`}>{MODE_INFO[room.mode].badge}</span><span className="public-room-info"><b>{MODE_INFO[room.mode].label}</b><small>{room.hostName}의 방 · {room.id}{room.spectatorCount > 0 ? ` · 관전 ${room.spectatorCount}` : ''}</small></span><em>{room.status === 'playing' ? '● 게임 중' : `${room.playerCount}/${room.maxPlayers}`}</em><strong>{room.status === 'playing' ? '관전 →' : '참가 →'}</strong></button>)}</div></section>
       <section className="practice-strip"><span><small>SOLO TRAINING</small><b>먼저 혼자 연습해 볼까요?</b></span><div>{(['grab', 'shoot', 'zombie', 'balloon', 'racing', 'treasure'] as GameMode[]).map(mode => <button key={mode} onClick={() => startDemo(mode)}>{MODE_INFO[mode].label}</button>)}</div></section>
     </main>}
 
@@ -353,10 +354,11 @@ function App() {
       </section>
       <section className="lobby-mode"><div><small>SELECTED GAME</small><strong>{MODE_INFO[gameMode].label}</strong><span>{state.hostId === playerId || demo ? '방장은 시작 전까지 변경할 수 있어요' : '방장이 선택한 게임으로 진행해요'}</span></div><div className="lobby-mode-buttons">{(['grab', 'shoot', 'zombie', 'balloon', 'racing', 'treasure'] as GameMode[]).map(mode => <button key={mode} className={gameMode === mode ? 'selected' : ''} disabled={!demo && state.hostId !== playerId} onClick={() => chooseLobbyMode(mode)}>{MODE_INFO[mode].number} {MODE_INFO[mode].badge}</button>)}</div></section>
       <section className="players"><div className="section-title"><h2>PLAYERS</h2><span>{state.players.length} / 5</span></div>{state.players.map((p, i) => <div className="player-slot" key={p.id}><strong>P{i + 1}</strong><div className={`avatar a${i + 1}`}>{p.nickname.charAt(0)}</div><span>{p.nickname}</span><i>READY</i></div>)}{Array.from({ length: Math.max(0, 5 - state.players.length) }, (_, i) => <div className="player-slot empty" key={i}><strong>?</strong><div className="avatar">+</div><span>친구를 기다리는 중...</span><i>WAIT</i></div>)}</section>
+      {state.spectators.length > 0 && <section className="spectator-list"><small>NEXT ROUND</small><b>관전자 {state.spectators.length}명</b><span>{state.spectators.map(spectator => spectator.nickname).join(' · ')}</span></section>}
       <div className="lobby-actions"><button className="ghost" onClick={exitRoom}>← 나가기</button>{demo || state.hostId === playerId ? <button className="primary big" onClick={startGame}>게임 시작 <span>READY?</span></button> : <div className="waiting-host" role="status">방장이 게임을 시작하기를 기다리는 중…</div>}</div>
     </main>}
 
-    {screen === 'game' && <main className={`game mode-${gameMode} feedback-${inputFeedback ?? 'idle'}`} onClick={() => inputRef.current?.focus()}>
+    {screen === 'game' && <main className={`game mode-${gameMode} feedback-${inputFeedback ?? 'idle'} ${isSpectator ? 'spectating' : ''}`} onClick={() => { if (!isSpectator) inputRef.current?.focus() }}>
       <div className="game-hud"><div><small>{gameMode === 'grab' ? 'ROOM' : 'MODE'}</small><b>{gameMode === 'grab' ? state.roomCode : MODE_INFO[gameMode].title.toUpperCase()}</b></div><div className={`timer ${seconds <= 10 ? 'danger' : ''}`}><small>TIME</small><strong>{String(seconds).padStart(2, '0')}<i>s</i></strong></div><div className="combo"><small>COMBO</small><b>× {me?.combo ?? 0}</b></div></div>
       <div className="scoreboard">{sorted.map((p, i) => <div className={p.id === playerId ? 'mine' : ''} key={p.id}><span>{i + 1}</span><b>{p.nickname}</b><em>{p.score.toLocaleString()}</em></div>)}</div>
       <section className={`arena ${gameMode === 'shoot' ? 'shooting-arena' : gameMode === 'zombie' ? 'zombie-arena' : gameMode === 'balloon' ? 'balloon-arena' : gameMode === 'racing' ? 'racing-arena' : gameMode === 'treasure' ? 'treasure-arena' : ''}`}>
@@ -375,8 +377,8 @@ function App() {
         })}{gameMode === 'shoot' && shotEffect && <div className="shot-effect" aria-hidden="true" style={{ '--impact-x': `${shotEffect.x}px`, '--impact-y': `${shotEffect.y}px`, '--shot-length': `${shotEffect.length}px`, '--shot-angle': `${shotEffect.angle}deg` } as React.CSSProperties}><i className="bullet-trail" /><i className="impact-flash" /><b>BANG!</b><span className="clay-shards">{Array.from({ length: 14 }, (_, shard) => <i key={shard} style={{ '--shard': shard, '--fall-x': `${((shard * 37) % 150) - 75}px` } as React.CSSProperties} />)}</span></div>}</div>
         {gameMode === 'zombie' && <div className="last-keyboard" aria-hidden="true"><i /><b>LAST<br />KEYBOARD</b><span>⌨</span></div>}
         {gameMode === 'shoot' && <div className={`range-gun ${shotEffect ? 'firing' : ''}`} aria-hidden="true"><i /><b>TYPE</b></div>}
-        <form className={`type-form ${inputFeedback ? `is-${inputFeedback}` : ''}`} onSubmit={submit}><div className="prompt">›</div><input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="단어를 입력하세요" autoComplete="off" autoCapitalize="none" enterKeyHint="send" spellCheck={false} aria-label="단어 입력" /><button>ENTER ↵</button></form>
-        <p className="tip">화면의 단어를 정확히 입력하고 ENTER! 가장 먼저 보낸 사람이 점수를 얻어요.</p>
+        {isSpectator ? <div className="spectator-bar"><b>● WATCHING LIVE</b><span>이번 판을 관전 중이에요. 종료 후 자리가 있으면 다음 판에 자동 참가합니다.</span></div> : <form className={`type-form ${inputFeedback ? `is-${inputFeedback}` : ''}`} onSubmit={submit}><div className="prompt">›</div><input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="단어를 입력하세요" autoComplete="off" autoCapitalize="none" enterKeyHint="send" spellCheck={false} aria-label="단어 입력" /><button>ENTER ↵</button></form>}
+        <p className="tip">{isSpectator ? '점수와 타깃이 실시간으로 갱신됩니다.' : '화면의 단어를 정확히 입력하고 ENTER! 가장 먼저 보낸 사람이 점수를 얻어요.'}</p>
       </section>
       {effect === 'blur' && <div className="interference blurfx"><b>BLUR ATTACK!</b></div>}
       {effect === 'ink' && <div className="interference inkfx"><i /><i /><i /><b>INK ATTACK!</b></div>}
@@ -384,7 +386,7 @@ function App() {
     </main>}
 
     {screen === 'result' && <main className="result">
-      <p className="eyebrow">{gameMode === 'zombie' && state.modeState?.baseHealth === 0 ? 'BASE DESTROYED' : 'GAME CLEAR'}</p><h1>{gameMode === 'zombie' ? state.modeState?.baseHealth === 0 ? 'DEFENSE FAILED!' : 'BASE SECURED!' : sorted[0]?.id === playerId ? 'YOU WIN!' : 'NICE TRY!'}</h1>
+      <p className="eyebrow">{isSpectator ? 'WATCH COMPLETE' : gameMode === 'zombie' && state.modeState?.baseHealth === 0 ? 'BASE DESTROYED' : 'GAME CLEAR'}</p><h1>{isSpectator ? 'NEXT ROUND?' : gameMode === 'zombie' ? state.modeState?.baseHealth === 0 ? 'DEFENSE FAILED!' : 'BASE SECURED!' : sorted[0]?.id === playerId ? 'YOU WIN!' : 'NICE TRY!'}</h1>
       <div className="trophy">{gameMode === 'zombie' && state.modeState?.baseHealth === 0 ? '×' : '★'}</div><h2>{gameMode === 'zombie' ? `TEAM ZAPS ${state.modeState?.teamKills ?? 0}` : sorted[0]?.nickname}</h2><p className="final-score">{sorted[0]?.score.toLocaleString()} <small>PTS</small></p>
       <section className="results-table">{sorted.map((p, i) => <div className={p.id === playerId ? 'mine' : ''} key={p.id}><strong>#{i + 1}</strong><span>{p.nickname}</span><b>{p.score.toLocaleString()}</b><em>MAX ×{p.combo}</em></div>)}</section>
       <div className="result-actions">{demo || state.hostId === playerId ? <><button className="primary" onClick={startGame}>한 판 더!</button><button className="ghost" onClick={returnToLobby}>대기실로</button></> : <><div className="waiting-host" role="status">방장의 선택을 기다리는 중…</div><button className="ghost" onClick={exitRoom}>나가기</button></>}</div>

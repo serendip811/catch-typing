@@ -168,15 +168,48 @@ describe("GameEngine", () => {
     engine.endMatch(room.id);
   });
 
-  it("lists only joinable lobby rooms with their mode and player count", () => {
+  it("lists joinable lobby rooms and playing rooms available to watch", () => {
     let sequence = 0;
     const engine = new GameEngine({ idFactory: () => `ROOM0${++sequence}`, maxPlayers: 2, minPlayers: 1 });
     const shoot = engine.createRoom("p1", "슈터", "shoot");
     const playing = engine.createRoom("p2", "캐처", "grab");
     engine.startMatch(playing.id, "p2");
-    assert.deepEqual(engine.listRooms(), [{ id: shoot.id, mode: "shoot", status: "lobby", playerCount: 1, maxPlayers: 2, hostName: "슈터" }]);
+    assert.deepEqual(engine.listRooms().map(({ id, status }) => ({ id, status })), [{ id: shoot.id, status: "lobby" }, { id: playing.id, status: "playing" }]);
     engine.joinRoom(shoot.id, "p3", "손님");
-    assert.deepEqual(engine.listRooms(), []);
+    assert.deepEqual(engine.listRooms().map(({ id, status }) => ({ id, status })), [{ id: playing.id, status: "playing" }]);
+  });
+
+  it("shows playing rooms and joins late arrivals as spectators for the next round", () => {
+    const engine = new GameEngine({ minPlayers: 1, idFactory: () => "LIVE01", words: ["하나", "둘", "셋", "넷"] });
+    const room = engine.createRoom("host", "방장", "grab");
+    engine.startMatch(room.id, "host");
+    const watched = engine.joinRoom(room.id, "viewer", "관전자");
+    assert.deepEqual(watched.players.map((player) => player.name), ["방장"]);
+    assert.deepEqual(watched.spectators.map((spectator) => spectator.name), ["관전자"]);
+    assert.equal(engine.listRooms()[0]?.status, "playing");
+    assert.equal(engine.listRooms()[0]?.spectatorCount, 1);
+    assert.throws(() => engine.submit(room.id, "viewer", watched.targets[0].id, watched.targets[0].text), /PLAYER_NOT_IN_ROOM/);
+    engine.endMatch(room.id);
+    const lobby = engine.returnToLobby(room.id, "host");
+    assert.deepEqual(lobby.players.map((player) => player.name), ["방장", "관전자"]);
+    assert.deepEqual(lobby.spectators, []);
+  });
+
+  it("uses a room shuffle deck without active or recently shown duplicates", () => {
+    const words = Array.from({ length: 30 }, (_, index) => `단어${index}`);
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 5, random: () => .37, words, idFactory: () => "DECK01" });
+    const room = engine.createRoom("host", "방장", "grab");
+    const started = engine.startMatch(room.id, "host");
+    assert.equal(new Set(started.targets.map((target) => target.text)).size, 5);
+    const seen = started.targets.map((target) => target.text);
+    for (let index = 0; index < 10; index += 1) {
+      const target = engine.getRoom(room.id)!.targets[0];
+      engine.submit(room.id, "host", target.id, target.text);
+      const replacement = engine.getRoom(room.id)!.targets[0].text;
+      assert.equal(seen.slice(-15).includes(replacement), false);
+      seen.push(replacement);
+    }
+    engine.endMatch(room.id);
   });
 
   it("creates three to five shared targets and a 60 second match", () => {

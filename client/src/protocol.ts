@@ -9,6 +9,7 @@ export type MatchState = {
   phase: 'lobby' | 'playing' | 'finished'
   targets: Target[]
   players: Player[]
+  spectators: Array<{ id: string; nickname: string }>
   endsAt?: number
   durationMs?: number
   modeState?: ModeState
@@ -19,9 +20,10 @@ export type PublicRoom = {
   modeState?: ModeState
   targets: Array<{ id: string; text: string; spawnedAt?: number; expiresAt?: number; kind?: Target['kind'] }>
   players: Array<{ id: string; name: string; score: number; combo: number }>
+  spectators: Array<{ id: string; name: string }>
 }
 
-export type RoomSummary = { id: string; mode: GameMode; status: MatchState['phase']; playerCount: number; maxPlayers: number; hostName: string }
+export type RoomSummary = { id: string; mode: GameMode; status: MatchState['phase']; playerCount: number; spectatorCount: number; maxPlayers: number; hostName: string; endsAt: number | null }
 
 export type ClientMessage =
   | { type: 'create_room'; name: string; mode: GameMode }
@@ -52,6 +54,7 @@ export const fromPublicRoom = (room: PublicRoom): MatchState => ({
   modeState: room.modeState,
   targets: room.targets.map(target => ({ ...target, points: 100 })),
   players: room.players.map(player => ({ id: player.id, nickname: player.name, score: player.score, combo: player.combo })),
+  spectators: (room.spectators ?? []).map(spectator => ({ id: spectator.id, nickname: spectator.name })),
 })
 
 export const configuredWsUrl = import.meta.env.VITE_WS_URL || `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.hostname}:8080`

@@ -76,6 +76,34 @@ describe("WebSocket room lifecycle", () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   });
 
+  it("lets a late arrival watch a running match without becoming a player", async () => {
+    const engine = new GameEngine({ minPlayers: 1, idFactory: () => "LIVE01", words: ["하나", "둘", "셋"] });
+    const server = createGameServer(0, engine);
+    await new Promise<void>((resolve) => server.once("listening", resolve));
+    const address = server.address();
+    assert.ok(address && typeof address === "object");
+    const url = `ws://127.0.0.1:${address.port}`;
+    const host = await connect(url);
+    const created = waitForMessage(host, (message) => message.type === "room_created");
+    host.send(JSON.stringify({ type: "create_room", name: "방장" }));
+    await created;
+    const started = waitForMessage(host, (message) => message.type === "match_started");
+    host.send(JSON.stringify({ type: "start_match" }));
+    await started;
+
+    const viewer = await connect(url);
+    const joined = waitForMessage(viewer, (message) => message.type === "room_joined");
+    viewer.send(JSON.stringify({ type: "join_room", roomId: "LIVE01", name: "관전자" }));
+    const message = await joined;
+    const joinedRoom = message.room as { players: unknown[]; spectators: Array<{ name: string }> };
+    assert.equal(joinedRoom.players.length, 1);
+    assert.deepEqual(joinedRoom.spectators.map((spectator) => spectator.name), ["관전자"]);
+
+    await close(viewer);
+    await close(host);
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+
   it("handles an explicit leave message and broadcasts the updated room", async () => {
     const engine = new GameEngine({ idFactory: () => "ROOM01" });
     const server = createGameServer(0, engine);

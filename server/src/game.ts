@@ -1,11 +1,13 @@
 import { EventEmitter } from "node:events";
 import { randomBytes } from "node:crypto";
 import { KOREAN_TARGETS } from "./words.js";
-import type { GameMode, PlayerState, PublicRoom, RoomSummary, ServerEvent, SubmissionOutcome, Target } from "./types.js";
+import type { GameMode, PlayerState, PublicRoom, RoomSummary, ServerEvent, SpectatorState, SubmissionOutcome, Target } from "./types.js";
 
 interface InternalRoom extends PublicRoom {
   claimedTargetIds: Set<string>;
   targetSequence: number;
+  wordDeck: string[];
+  recentWords: string[];
   timer?: ReturnType<typeof setTimeout>;
   tickTimer?: ReturnType<typeof setInterval>;
 }
@@ -50,7 +52,7 @@ export class GameEngine extends EventEmitter {
     while (this.rooms.has(id)) id = this.idFactory();
     const room: InternalRoom = {
       id, hostId: playerId, mode, status: "lobby", durationMs: this.durationMs, endsAt: null,
-      targets: [], players: [this.newPlayer(playerId, name)], claimedTargetIds: new Set(), targetSequence: 0
+      targets: [], players: [this.newPlayer(playerId, name)], spectators: [], claimedTargetIds: new Set(), targetSequence: 0, wordDeck: [], recentWords: []
     };
     this.rooms.set(id, room);
     this.broadcast(room, { type: "room_state", room: this.publicRoom(room) });
@@ -69,8 +71,9 @@ export class GameEngine extends EventEmitter {
 
   joinRoom(roomId: string, playerId: string, name: string): PublicRoom {
     const room = this.requireRoom(roomId);
-    if (room.status !== "lobby") throw new Error("MATCH_ALREADY_STARTED");
-    if (!room.players.some((player) => player.id === playerId)) {
+    if (room.status === "playing" || room.status === "finished") {
+      if (!room.spectators.some((spectator) => spectator.id === playerId)) room.spectators.push(this.newSpectator(playerId, name));
+    } else if (!room.players.some((player) => player.id === playerId)) {
       if (room.players.length >= this.maxPlayers) throw new Error("ROOM_FULL");
       room.players.push(this.newPlayer(playerId, name));
     }
@@ -81,6 +84,13 @@ export class GameEngine extends EventEmitter {
   leaveRoom(roomId: string, playerId: string): PublicRoom | undefined {
     const room = this.rooms.get(roomId.toUpperCase());
     if (!room) return undefined;
+    const spectatorIndex = room.spectators.findIndex((spectator) => spectator.id === playerId);
+    if (spectatorIndex >= 0) {
+      room.spectators.splice(spectatorIndex, 1);
+      const publicRoom = this.publicRoom(room);
+      this.broadcast(room, { type: "room_state", room: publicRoom });
+      return publicRoom;
+    }
     const index = room.players.findIndex((player) => player.id === playerId);
     if (index < 0) return this.publicRoom(room);
 
@@ -101,12 +111,13 @@ export class GameEngine extends EventEmitter {
     const room = this.requireRoom(roomId);
     if (room.hostId !== playerId) throw new Error("HOST_ONLY");
     if (room.status === "playing") throw new Error("INVALID_ROOM_STATE");
+    if (room.status === "finished") { this.resetRoom(room); this.promoteSpectators(room); }
     if (room.players.length < this.minPlayers) throw new Error("NOT_ENOUGH_PLAYERS");
-    if (room.status === "finished") this.resetRoom(room);
     room.status = "playing";
     room.endsAt = this.now() + room.durationMs;
     room.modeState = room.mode === "zombie" ? { baseHealth: 100, wave: 1, teamKills: 0 } : room.mode === "racing" ? { trackLength: 100, race: Object.fromEntries(room.players.map((player) => [player.id, { distance: 0, nitro: 0 }])) } : room.mode === "treasure" ? { treasure: Object.fromEntries(room.players.map((player) => [player.id, { keys: 0, maps: 0 }])) } : undefined;
-    room.targets = Array.from({ length: this.targetCount }, () => this.nextTarget(room));
+    room.targets = [];
+    for (let index = 0; index < this.targetCount; index += 1) room.targets.push(this.nextTarget(room));
     room.timer = setTimeout(() => this.endMatch(room.id), room.durationMs);
     room.timer.unref?.();
     if (room.mode === "zombie" || room.mode === "balloon") {
@@ -123,6 +134,7 @@ export class GameEngine extends EventEmitter {
     if (room.hostId !== playerId) throw new Error("HOST_ONLY");
     if (room.status === "playing") throw new Error("INVALID_ROOM_STATE");
     this.resetRoom(room);
+    this.promoteSpectators(room);
     const publicRoom = this.publicRoom(room);
     this.broadcast(room, { type: "room_state", room: publicRoom });
     return publicRoom;
@@ -250,14 +262,16 @@ export class GameEngine extends EventEmitter {
 
   listRooms(): RoomSummary[] {
     return [...this.rooms.values()]
-      .filter((room) => room.status === "lobby" && room.players.length < this.maxPlayers)
+      .filter((room) => room.status === "playing" || (room.status === "lobby" && room.players.length < this.maxPlayers))
       .map((room) => ({
         id: room.id,
         mode: room.mode,
         status: room.status,
         playerCount: room.players.length,
+        spectatorCount: room.spectators.length,
         maxPlayers: this.maxPlayers,
-        hostName: room.players.find((player) => player.id === room.hostId)?.name ?? "Player"
+        hostName: room.players.find((player) => player.id === room.hostId)?.name ?? "Player",
+        endsAt: room.endsAt
       }));
   }
 
@@ -270,7 +284,7 @@ export class GameEngine extends EventEmitter {
   }
 
   private nextTarget(room: InternalRoom): Target {
-    const text = this.words[Math.floor(this.random() * this.words.length)] ?? this.words[0];
+    const text = this.nextWord(room);
     if (room.mode === "balloon") {
       const roll = this.random();
       const kind = roll > .93 ? "bomb" : roll > .82 ? "giant" : roll > .58 ? "chain" : "balloon";
@@ -280,13 +294,13 @@ export class GameEngine extends EventEmitter {
     if (room.mode === "racing") {
       const roll = this.random();
       const kind = roll > .8 ? "nitro" : roll > .55 ? "corner" : "speed";
-      const second = this.words[Math.floor(this.random() * this.words.length)] ?? this.words[0];
+      const second = this.nextWord(room);
       return { id: `${room.id}-${++room.targetSequence}`, text: kind === "nitro" ? `${text} ${second}` : text, kind };
     }
     if (room.mode === "treasure") {
       const roll = this.random();
       const kind = roll > .9 ? "vault" : roll > .76 ? "trap" : roll > .58 ? "map" : roll > .4 ? "key" : "chest";
-      const second = this.words[Math.floor(this.random() * this.words.length)] ?? this.words[0];
+      const second = this.nextWord(room);
       return { id: `${room.id}-${++room.targetSequence}`, text: kind === "vault" ? `${text} ${second}` : text, kind };
     }
     if (room.mode !== "zombie") return { id: `${room.id}-${++room.targetSequence}`, text };
@@ -300,6 +314,46 @@ export class GameEngine extends EventEmitter {
     return { id, name: name.trim().slice(0, 16) || "Player", score: 0, combo: 0 };
   }
 
+  private newSpectator(id: string, name: string): SpectatorState {
+    return { id, name: name.trim().slice(0, 16) || "Viewer" };
+  }
+
+  private promoteSpectators(room: InternalRoom): void {
+    while (room.players.length < this.maxPlayers && room.spectators.length > 0) {
+      const spectator = room.spectators.shift();
+      if (spectator) room.players.push(this.newPlayer(spectator.id, spectator.name));
+    }
+  }
+
+  private nextWord(room: InternalRoom): string {
+    const recentLimit = Math.min(15, Math.max(0, this.words.length - this.targetCount));
+    const active = new Set(room.targets.map((target) => target.text));
+    const recent = new Set(room.recentWords.slice(-recentLimit));
+    const take = (avoidRecent: boolean, avoidActive: boolean): string | undefined => {
+      if (room.wordDeck.length === 0) room.wordDeck = this.shuffle([...new Set(this.words.map(normalize).filter(Boolean))]);
+      const attempts = room.wordDeck.length;
+      for (let index = 0; index < attempts; index += 1) {
+        const candidate = room.wordDeck.shift();
+        if (!candidate) continue;
+        if ((avoidRecent && recent.has(candidate)) || (avoidActive && active.has(candidate))) { room.wordDeck.push(candidate); continue; }
+        return candidate;
+      }
+      return undefined;
+    };
+    const word = take(true, true) ?? take(false, true) ?? take(false, false) ?? this.words[0];
+    room.recentWords.push(word);
+    if (room.recentWords.length > 30) room.recentWords.shift();
+    return word;
+  }
+
+  private shuffle(values: string[]): string[] {
+    for (let index = values.length - 1; index > 0; index -= 1) {
+      const target = Math.floor(this.random() * (index + 1));
+      [values[index], values[target]] = [values[target], values[index]];
+    }
+    return values;
+  }
+
   private resetRoom(room: InternalRoom): void {
     if (room.timer) clearTimeout(room.timer);
     if (room.tickTimer) clearInterval(room.tickTimer);
@@ -308,6 +362,8 @@ export class GameEngine extends EventEmitter {
     room.status = "lobby";
     room.endsAt = null;
     room.targets = [];
+    room.wordDeck = [];
+    room.recentWords = [];
     room.modeState = undefined;
     room.claimedTargetIds.clear();
     for (const player of room.players) {
@@ -326,7 +382,7 @@ export class GameEngine extends EventEmitter {
     return {
       id: room.id, hostId: room.hostId, mode: room.mode, status: room.status, durationMs: room.durationMs,
       endsAt: room.endsAt, modeState: room.modeState ? { ...room.modeState, ...(room.modeState.race ? { race: Object.fromEntries(Object.entries(room.modeState.race).map(([id, racer]) => [id, { ...racer }])) } : {}), ...(room.modeState.treasure ? { treasure: Object.fromEntries(Object.entries(room.modeState.treasure).map(([id, bag]) => [id, { ...bag }])) } : {}) } : undefined, targets: room.targets.map((target) => ({ ...target })),
-      players: room.players.map((player) => ({ ...player }))
+      players: room.players.map((player) => ({ ...player })), spectators: room.spectators.map((spectator) => ({ ...spectator }))
     };
   }
 
