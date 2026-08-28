@@ -8,6 +8,8 @@ interface InternalRoom extends PublicRoom {
   targetSequence: number;
   wordDeck: string[];
   recentWords: string[];
+  crownLastTickAt?: number;
+  crownScoreCarryMs?: number;
   timer?: ReturnType<typeof setTimeout>;
   tickTimer?: ReturnType<typeof setInterval>;
 }
@@ -115,12 +117,14 @@ export class GameEngine extends EventEmitter {
     if (room.players.length < this.minPlayers) throw new Error("NOT_ENOUGH_PLAYERS");
     room.status = "playing";
     room.endsAt = this.now() + room.durationMs;
-    room.modeState = room.mode === "zombie" ? { baseHealth: 100, wave: 1, teamKills: 0 } : room.mode === "racing" ? { trackLength: 100, race: Object.fromEntries(room.players.map((player) => [player.id, { distance: 0, nitro: 0 }])) } : room.mode === "treasure" ? { treasure: Object.fromEntries(room.players.map((player) => [player.id, { keys: 0, maps: 0 }])) } : undefined;
+    room.modeState = room.mode === "zombie" ? { baseHealth: 100, wave: 1, teamKills: 0 } : room.mode === "racing" ? { trackLength: 100, race: Object.fromEntries(room.players.map((player) => [player.id, { distance: 0, nitro: 0 }])) } : room.mode === "treasure" ? { treasure: Object.fromEntries(room.players.map((player) => [player.id, { keys: 0, maps: 0 }])) } : room.mode === "crown" ? { crown: { streak: 0, heldMs: Object.fromEntries(room.players.map((player) => [player.id, 0])) } } : undefined;
     room.targets = [];
-    for (let index = 0; index < this.targetCount; index += 1) room.targets.push(this.nextTarget(room));
+    for (let index = 0; index < this.targetCount; index += 1) room.targets.push(this.nextTarget(room, room.mode === "crown" ? index === 0 ? "crown" : "guard" : undefined));
+    room.crownLastTickAt = this.now();
+    room.crownScoreCarryMs = 0;
     room.timer = setTimeout(() => this.endMatch(room.id), room.durationMs);
     room.timer.unref?.();
-    if (room.mode === "zombie" || room.mode === "balloon") {
+    if (room.mode === "zombie" || room.mode === "balloon" || room.mode === "crown") {
       room.tickTimer = setInterval(() => this.advanceMode(room.id), 250);
       room.tickTimer.unref?.();
     }
@@ -157,11 +161,11 @@ export class GameEngine extends EventEmitter {
         outcome = "success";
         const claimed = room.targets[index];
         room.claimedTargetIds.add(claimed.id);
-        replacement = this.nextTarget(room);
+        replacement = this.nextTarget(room, room.mode === "crown" ? claimed.kind === "crown" ? "crown" : "guard" : undefined);
         room.targets.splice(index, 1, replacement);
         player.combo = claimed.kind === "bomb" || claimed.kind === "trap" ? 0 : player.combo + 1;
         const treasureBag = room.modeState?.treasure?.[player.id] ?? { keys: 0, maps: 0 };
-        scoreDelta = room.mode === "racing" ? claimed.kind === "nitro" ? 180 : claimed.kind === "corner" ? 130 : 100 : room.mode === "treasure" ? claimed.kind === "trap" ? -80 : claimed.kind === "vault" ? treasureBag.keys > 0 ? 400 : 180 : claimed.kind === "map" ? 120 : claimed.kind === "key" ? 80 : 100 : claimed.kind === "bomb" ? -100 : claimed.kind === "giant" ? 250 : claimed.kind === "chain" ? 150 : 100 + Math.min(player.combo - 1, 10) * 10;
+        scoreDelta = room.mode === "racing" ? claimed.kind === "nitro" ? 180 : claimed.kind === "corner" ? 130 : 100 : room.mode === "treasure" ? claimed.kind === "trap" ? -80 : claimed.kind === "vault" ? treasureBag.keys > 0 ? 400 : 180 : claimed.kind === "map" ? 120 : claimed.kind === "key" ? 80 : 100 : room.mode === "crown" ? claimed.kind === "crown" ? 150 : 80 : claimed.kind === "bomb" ? -100 : claimed.kind === "giant" ? 250 : claimed.kind === "chain" ? 150 : 100 + Math.min(player.combo - 1, 10) * 10;
         if (claimed.kind === "chain") {
           const chainedIndex = room.targets.findIndex((target, candidateIndex) => candidateIndex !== index && target.kind === "chain");
           if (chainedIndex >= 0) {
@@ -200,6 +204,19 @@ export class GameEngine extends EventEmitter {
           if (claimed.kind === "trap") player.combo = 0;
           room.modeState.treasure[player.id] = bag;
         }
+        if (room.mode === "crown" && room.modeState?.crown) {
+          const crown = room.modeState.crown;
+          if (claimed.kind === "crown") {
+            crown.streak = crown.holderId === player.id ? Math.min(5, crown.streak + 1) : 1;
+            crown.holderId = player.id;
+            room.crownScoreCarryMs = 0;
+          } else if (crown.holderId === player.id) {
+            crown.streak = Math.min(5, crown.streak + 1);
+            const defenseBonus = crown.streak * 20;
+            scoreDelta += defenseBonus;
+            player.score += defenseBonus;
+          }
+        }
       } else {
         player.combo = 0;
         if (room.mode === "racing" && room.modeState?.race?.[player.id]) {
@@ -214,7 +231,7 @@ export class GameEngine extends EventEmitter {
 
     this.broadcast(room, { type: "submission_result", playerId, targetId, outcome, scoreDelta, combo: player.combo, replacement });
     this.broadcast(room, { type: "room_state", room: this.publicRoom(room) });
-    if (room.mode !== "zombie" && room.mode !== "racing" && outcome === "success" && player.combo > 0 && player.combo % 3 === 0) this.emitInterference(room, player);
+    if (room.mode !== "zombie" && room.mode !== "racing" && room.mode !== "crown" && outcome === "success" && player.combo > 0 && player.combo % 3 === 0) this.emitInterference(room, player);
     if (shouldFinishRace) this.endMatch(room.id);
     return outcome;
   }
@@ -222,6 +239,21 @@ export class GameEngine extends EventEmitter {
   advanceMode(roomId: string): PublicRoom {
     const room = this.requireRoom(roomId);
     if (room.status !== "playing") return this.publicRoom(room);
+    if (room.mode === "crown" && room.modeState?.crown) {
+      const now = this.now(); const elapsed = Math.max(0, now - (room.crownLastTickAt ?? now)); room.crownLastTickAt = now;
+      const crown = room.modeState.crown;
+      if (crown.holderId) {
+        crown.heldMs[crown.holderId] = (crown.heldMs[crown.holderId] ?? 0) + elapsed;
+        room.crownScoreCarryMs = (room.crownScoreCarryMs ?? 0) + elapsed;
+        const seconds = Math.floor(room.crownScoreCarryMs / 1000);
+        if (seconds > 0) {
+          const holder = room.players.find((player) => player.id === crown.holderId);
+          if (holder) holder.score += seconds * 10 * Math.max(1, crown.streak);
+          room.crownScoreCarryMs -= seconds * 1000;
+        }
+      }
+      const publicRoom = this.publicRoom(room); this.broadcast(room, { type: "room_state", room: publicRoom }); return publicRoom;
+    }
     if (room.mode === "balloon") {
       const expiredIndexes = room.targets.flatMap((target, index) => target.expiresAt !== undefined && target.expiresAt <= this.now() ? [index] : []);
       if (expiredIndexes.length === 0) return this.publicRoom(room);
@@ -283,8 +315,9 @@ export class GameEngine extends EventEmitter {
     this.broadcast(room, { type: "interference", fromPlayerId: source.id, toPlayerId: target.id, effect, durationMs: 1800 });
   }
 
-  private nextTarget(room: InternalRoom): Target {
+  private nextTarget(room: InternalRoom, forcedKind?: "crown" | "guard"): Target {
     const text = this.nextWord(room);
+    if (room.mode === "crown") return { id: `${room.id}-${++room.targetSequence}`, text, kind: forcedKind ?? "guard" };
     if (room.mode === "balloon") {
       const roll = this.random();
       const kind = roll > .93 ? "bomb" : roll > .82 ? "giant" : roll > .58 ? "chain" : "balloon";
@@ -364,6 +397,8 @@ export class GameEngine extends EventEmitter {
     room.targets = [];
     room.wordDeck = [];
     room.recentWords = [];
+    room.crownLastTickAt = undefined;
+    room.crownScoreCarryMs = undefined;
     room.modeState = undefined;
     room.claimedTargetIds.clear();
     for (const player of room.players) {
@@ -381,7 +416,7 @@ export class GameEngine extends EventEmitter {
   private publicRoom(room: InternalRoom): PublicRoom {
     return {
       id: room.id, hostId: room.hostId, mode: room.mode, status: room.status, durationMs: room.durationMs,
-      endsAt: room.endsAt, modeState: room.modeState ? { ...room.modeState, ...(room.modeState.race ? { race: Object.fromEntries(Object.entries(room.modeState.race).map(([id, racer]) => [id, { ...racer }])) } : {}), ...(room.modeState.treasure ? { treasure: Object.fromEntries(Object.entries(room.modeState.treasure).map(([id, bag]) => [id, { ...bag }])) } : {}) } : undefined, targets: room.targets.map((target) => ({ ...target })),
+      endsAt: room.endsAt, modeState: room.modeState ? { ...room.modeState, ...(room.modeState.race ? { race: Object.fromEntries(Object.entries(room.modeState.race).map(([id, racer]) => [id, { ...racer }])) } : {}), ...(room.modeState.treasure ? { treasure: Object.fromEntries(Object.entries(room.modeState.treasure).map(([id, bag]) => [id, { ...bag }])) } : {}), ...(room.modeState.crown ? { crown: { ...room.modeState.crown, heldMs: { ...room.modeState.crown.heldMs } } } : {}) } : undefined, targets: room.targets.map((target) => ({ ...target })),
       players: room.players.map((player) => ({ ...player })), spectators: room.spectators.map((spectator) => ({ ...spectator }))
     };
   }

@@ -1,7 +1,7 @@
 export type Player = { id: string; nickname: string; score: number; combo: number; connected?: boolean }
-export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' | 'balloon' | 'chain' | 'bomb' | 'giant' | 'speed' | 'nitro' | 'corner' | 'chest' | 'key' | 'trap' | 'vault' | 'map' }
-export type GameMode = 'grab' | 'shoot' | 'zombie' | 'balloon' | 'racing' | 'treasure'
-export type ModeState = { baseHealth?: number; wave?: number; teamKills?: number; trackLength?: number; race?: Record<string, { distance: number; nitro: number; finishedAt?: number }>; treasure?: Record<string, { keys: number; maps: number }> }
+export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' | 'balloon' | 'chain' | 'bomb' | 'giant' | 'speed' | 'nitro' | 'corner' | 'chest' | 'key' | 'trap' | 'vault' | 'map' | 'crown' | 'guard' }
+export type GameMode = 'grab' | 'shoot' | 'zombie' | 'balloon' | 'racing' | 'treasure' | 'crown'
+export type ModeState = { baseHealth?: number; wave?: number; teamKills?: number; trackLength?: number; race?: Record<string, { distance: number; nitro: number; finishedAt?: number }>; treasure?: Record<string, { keys: number; maps: number }>; crown?: { holderId?: string; streak: number; heldMs: Record<string, number> } }
 export type MatchState = {
   roomCode: string
   hostId?: string

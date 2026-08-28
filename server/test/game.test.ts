@@ -168,6 +168,62 @@ describe("GameEngine", () => {
     engine.endMatch(room.id);
   });
 
+  it("starts Crown Keeper with one shared crown and guard targets", () => {
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 5, random: () => 0, words: ["왕관", "수비", "성벽", "기사", "황금"], idFactory: () => "CROWN1" });
+    const room = engine.createRoom("host", "왕", "crown");
+    const started = engine.startMatch(room.id, "host");
+    assert.deepEqual(started.modeState?.crown, { streak: 0, heldMs: { host: 0 } });
+    assert.equal(started.targets.filter((target) => target.kind === "crown").length, 1);
+    assert.equal(started.targets.filter((target) => target.kind === "guard").length, 4);
+    engine.endMatch(room.id);
+  });
+
+  it("transfers the crown and awards authoritative hold points", () => {
+    let now = 1_000;
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => 0, words: ["왕관", "수비", "성벽", "기사"], idFactory: () => "CROWN1" });
+    const room = engine.createRoom("host", "왕", "crown");
+    engine.joinRoom(room.id, "rival", "도전자");
+    engine.startMatch(room.id, "host");
+    let crownTarget = engine.getRoom(room.id)!.targets.find((target) => target.kind === "crown")!;
+    engine.submit(room.id, "host", crownTarget.id, crownTarget.text);
+    assert.deepEqual(engine.getRoom(room.id)?.modeState?.crown, { holderId: "host", streak: 1, heldMs: { host: 0, rival: 0 } });
+    now = 2_000;
+    engine.advanceMode(room.id);
+    assert.equal(engine.getRoom(room.id)?.players.find((player) => player.id === "host")?.score, 160);
+    assert.equal(engine.getRoom(room.id)?.modeState?.crown?.heldMs.host, 1_000);
+
+    crownTarget = engine.getRoom(room.id)!.targets.find((target) => target.kind === "crown")!;
+    engine.submit(room.id, "rival", crownTarget.id, crownTarget.text);
+    assert.equal(engine.getRoom(room.id)?.modeState?.crown?.holderId, "rival");
+    now = 4_000;
+    engine.advanceMode(room.id);
+    assert.equal(engine.getRoom(room.id)?.players.find((player) => player.id === "rival")?.score, 170);
+    assert.equal(engine.getRoom(room.id)?.modeState?.crown?.heldMs.rival, 2_000);
+    engine.endMatch(room.id);
+  });
+
+  it("builds Crown Keeper defense power without attacking opponents", () => {
+    let now = 1_000;
+    const events: ServerEvent[] = [];
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, now: () => now, random: () => 0, words: ["왕관", "방패", "성문", "기사"], idFactory: () => "CROWN1" });
+    const room = engine.createRoom("host", "왕", "crown");
+    engine.startMatch(room.id, "host");
+    engine.on("event", (_roomId, event) => events.push(event));
+    let target = engine.getRoom(room.id)!.targets.find((candidate) => candidate.kind === "crown")!;
+    engine.submit(room.id, "host", target.id, target.text);
+    for (let index = 0; index < 2; index += 1) {
+      target = engine.getRoom(room.id)!.targets.find((candidate) => candidate.kind === "guard")!;
+      engine.submit(room.id, "host", target.id, target.text);
+    }
+    assert.equal(engine.getRoom(room.id)?.modeState?.crown?.streak, 3);
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 410);
+    now = 2_000;
+    engine.advanceMode(room.id);
+    assert.equal(engine.getRoom(room.id)?.players[0].score, 440);
+    assert.equal(events.some((event) => event.type === "interference"), false);
+    engine.endMatch(room.id);
+  });
+
   it("lists joinable lobby rooms and playing rooms available to watch", () => {
     let sequence = 0;
     const engine = new GameEngine({ idFactory: () => `ROOM0${++sequence}`, maxPlayers: 2, minPlayers: 1 });
