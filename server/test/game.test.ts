@@ -96,6 +96,38 @@ describe("GameEngine", () => {
     bombEngine.endMatch(bombRoom.id);
   });
 
+  it("tracks racing distance, nitro, mistakes, and the finish line", () => {
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => 0, words: ["출발"], idFactory: () => "RACE01" });
+    const room = engine.createRoom("host", "레이서", "racing");
+    const started = engine.startMatch(room.id, "host");
+    assert.deepEqual(started.modeState, { trackLength: 100, race: { host: { distance: 0, nitro: 0 } } });
+    assert.ok(started.targets.every((target) => target.kind === "speed"));
+    let target = engine.getRoom(room.id)!.targets[0];
+    engine.submit(room.id, "host", target.id, target.text);
+    assert.equal(engine.getRoom(room.id)?.modeState?.race?.host.distance, 8);
+    engine.submit(room.id, "host", "missing", "오타");
+    assert.equal(engine.getRoom(room.id)?.modeState?.race?.host.distance, 6);
+    for (let index = 0; index < 12; index += 1) {
+      target = engine.getRoom(room.id)!.targets[0];
+      engine.submit(room.id, "host", target.id, target.text);
+    }
+    assert.equal(engine.getRoom(room.id)?.status, "finished");
+    assert.equal(engine.getRoom(room.id)?.modeState?.race?.host.distance, 100);
+  });
+
+  it("charges and automatically spends racing nitro", () => {
+    const engine = new GameEngine({ minPlayers: 1, targetCount: 3, random: () => .9, words: ["네온"], idFactory: () => "NITRO1" });
+    const room = engine.createRoom("host", "레이서", "racing");
+    engine.startMatch(room.id, "host");
+    for (let index = 0; index < 3; index += 1) {
+      const target = engine.getRoom(room.id)!.targets[0];
+      assert.equal(target.kind, "nitro");
+      assert.equal(engine.submit(room.id, "host", target.id, target.text), "success");
+    }
+    assert.deepEqual(engine.getRoom(room.id)?.modeState?.race?.host, { distance: 60, nitro: 0 });
+    engine.endMatch(room.id);
+  });
+
   it("lists only joinable lobby rooms with their mode and player count", () => {
     let sequence = 0;
     const engine = new GameEngine({ idFactory: () => `ROOM0${++sequence}`, maxPlayers: 2, minPlayers: 1 });

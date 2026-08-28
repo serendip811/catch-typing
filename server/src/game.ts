@@ -105,7 +105,7 @@ export class GameEngine extends EventEmitter {
     if (room.status === "finished") this.resetRoom(room);
     room.status = "playing";
     room.endsAt = this.now() + room.durationMs;
-    room.modeState = room.mode === "zombie" ? { baseHealth: 100, wave: 1, teamKills: 0 } : undefined;
+    room.modeState = room.mode === "zombie" ? { baseHealth: 100, wave: 1, teamKills: 0 } : room.mode === "racing" ? { trackLength: 100, race: Object.fromEntries(room.players.map((player) => [player.id, { distance: 0, nitro: 0 }])) } : undefined;
     room.targets = Array.from({ length: this.targetCount }, () => this.nextTarget(room));
     room.timer = setTimeout(() => this.endMatch(room.id), room.durationMs);
     room.timer.unref?.();
@@ -135,6 +135,7 @@ export class GameEngine extends EventEmitter {
     let outcome: SubmissionOutcome = "miss";
     let scoreDelta = 0;
     let replacement: Target | undefined;
+    let shouldFinishRace = false;
 
     if (room.status === "playing" && room.endsAt !== null && this.now() < room.endsAt) {
       const index = room.targets.findIndex((target) => target.id === targetId);
@@ -147,7 +148,7 @@ export class GameEngine extends EventEmitter {
         replacement = this.nextTarget(room);
         room.targets.splice(index, 1, replacement);
         player.combo = claimed.kind === "bomb" ? 0 : player.combo + 1;
-        scoreDelta = claimed.kind === "bomb" ? -100 : claimed.kind === "giant" ? 250 : claimed.kind === "chain" ? 150 : 100 + Math.min(player.combo - 1, 10) * 10;
+        scoreDelta = room.mode === "racing" ? claimed.kind === "nitro" ? 180 : claimed.kind === "corner" ? 130 : 100 : claimed.kind === "bomb" ? -100 : claimed.kind === "giant" ? 250 : claimed.kind === "chain" ? 150 : 100 + Math.min(player.combo - 1, 10) * 10;
         if (claimed.kind === "chain") {
           const chainedIndex = room.targets.findIndex((target, candidateIndex) => candidateIndex !== index && target.kind === "chain");
           if (chainedIndex >= 0) {
@@ -162,8 +163,26 @@ export class GameEngine extends EventEmitter {
           room.modeState.wave = Math.min(9, 1 + Math.floor((room.modeState.teamKills ?? 0) / 8));
           if (player.combo % 3 === 0) room.modeState.baseHealth = Math.min(100, (room.modeState.baseHealth ?? 100) + 5);
         }
+        if (room.mode === "racing" && room.modeState?.race) {
+          const racer = room.modeState.race[player.id] ?? { distance: 0, nitro: 0 };
+          const gainedNitro = claimed.kind === "nitro" ? 38 : claimed.kind === "corner" ? 12 : 8;
+          const chargedNitro = Math.min(100, racer.nitro + gainedNitro);
+          const boost = chargedNitro >= 100 ? 18 : 0;
+          racer.distance = Math.min(room.modeState.trackLength ?? 100, racer.distance + (claimed.kind === "nitro" ? 14 : claimed.kind === "corner" ? 11 : 8) + boost);
+          racer.nitro = boost > 0 ? 0 : chargedNitro;
+          if (racer.distance >= (room.modeState.trackLength ?? 100)) {
+            racer.finishedAt = this.now();
+            shouldFinishRace = true;
+          }
+          room.modeState.race[player.id] = racer;
+        }
       } else {
         player.combo = 0;
+        if (room.mode === "racing" && room.modeState?.race?.[player.id]) {
+          const racer = room.modeState.race[player.id];
+          racer.distance = Math.max(0, racer.distance - 2);
+          racer.nitro = Math.max(0, racer.nitro - 10);
+        }
       }
     } else {
       player.combo = 0;
@@ -171,7 +190,8 @@ export class GameEngine extends EventEmitter {
 
     this.broadcast(room, { type: "submission_result", playerId, targetId, outcome, scoreDelta, combo: player.combo, replacement });
     this.broadcast(room, { type: "room_state", room: this.publicRoom(room) });
-    if (room.mode !== "zombie" && outcome === "success" && player.combo > 0 && player.combo % 3 === 0) this.emitInterference(room, player);
+    if (room.mode !== "zombie" && room.mode !== "racing" && outcome === "success" && player.combo > 0 && player.combo % 3 === 0) this.emitInterference(room, player);
+    if (shouldFinishRace) this.endMatch(room.id);
     return outcome;
   }
 
@@ -245,6 +265,12 @@ export class GameEngine extends EventEmitter {
       const lifetime = kind === "giant" ? 11_000 : 7_000 + Math.floor(this.random() * 2_500);
       return { id: `${room.id}-${++room.targetSequence}`, text, spawnedAt: this.now(), expiresAt: this.now() + lifetime, kind };
     }
+    if (room.mode === "racing") {
+      const roll = this.random();
+      const kind = roll > .8 ? "nitro" : roll > .55 ? "corner" : "speed";
+      const second = this.words[Math.floor(this.random() * this.words.length)] ?? this.words[0];
+      return { id: `${room.id}-${++room.targetSequence}`, text: kind === "nitro" ? `${text} ${second}` : text, kind };
+    }
     if (room.mode !== "zombie") return { id: `${room.id}-${++room.targetSequence}`, text };
     const wave = room.modeState?.wave ?? 1;
     const lifetime = Math.max(4_800, 10_000 - wave * 550 + Math.floor(this.random() * 2_000));
@@ -281,7 +307,7 @@ export class GameEngine extends EventEmitter {
   private publicRoom(room: InternalRoom): PublicRoom {
     return {
       id: room.id, hostId: room.hostId, mode: room.mode, status: room.status, durationMs: room.durationMs,
-      endsAt: room.endsAt, modeState: room.modeState ? { ...room.modeState } : undefined, targets: room.targets.map((target) => ({ ...target })),
+      endsAt: room.endsAt, modeState: room.modeState ? { ...room.modeState, ...(room.modeState.race ? { race: Object.fromEntries(Object.entries(room.modeState.race).map(([id, racer]) => [id, { ...racer }])) } : {}) } : undefined, targets: room.targets.map((target) => ({ ...target })),
       players: room.players.map((player) => ({ ...player }))
     };
   }

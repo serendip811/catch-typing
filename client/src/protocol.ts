@@ -1,7 +1,7 @@
 export type Player = { id: string; nickname: string; score: number; combo: number; connected?: boolean }
-export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' | 'balloon' | 'chain' | 'bomb' | 'giant' }
-export type GameMode = 'grab' | 'shoot' | 'zombie' | 'balloon'
-export type ModeState = { baseHealth?: number; wave?: number; teamKills?: number }
+export type Target = { id: string; text: string; points?: number; spawnedAt?: number; expiresAt?: number; kind?: 'normal' | 'armored' | 'exploder' | 'balloon' | 'chain' | 'bomb' | 'giant' | 'speed' | 'nitro' | 'corner' }
+export type GameMode = 'grab' | 'shoot' | 'zombie' | 'balloon' | 'racing'
+export type ModeState = { baseHealth?: number; wave?: number; teamKills?: number; trackLength?: number; race?: Record<string, { distance: number; nitro: number; finishedAt?: number }> }
 export type MatchState = {
   roomCode: string
   hostId?: string

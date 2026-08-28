@@ -1,18 +1,20 @@
 export type RoomStatus = "lobby" | "playing" | "finished";
-export type GameMode = "grab" | "shoot" | "zombie" | "balloon";
+export type GameMode = "grab" | "shoot" | "zombie" | "balloon" | "racing";
 
 export interface Target {
   id: string;
   text: string;
   spawnedAt?: number;
   expiresAt?: number;
-  kind?: "normal" | "armored" | "exploder" | "balloon" | "chain" | "bomb" | "giant";
+  kind?: "normal" | "armored" | "exploder" | "balloon" | "chain" | "bomb" | "giant" | "speed" | "nitro" | "corner";
 }
 
 export interface ModeState {
   baseHealth?: number;
   wave?: number;
   teamKills?: number;
+  trackLength?: number;
+  race?: Record<string, { distance: number; nitro: number; finishedAt?: number }>;
 }
 
 export interface PlayerState {
