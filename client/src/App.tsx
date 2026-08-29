@@ -376,6 +376,11 @@ function App() {
   const crownRate = 10 * Math.max(1, state.modeState?.crown?.streak ?? 0)
   const crownHeldSeconds = (state.modeState?.crown?.heldMs[crownHolderId ?? ''] ?? 0) / 1000
   const crownPower = state.modeState?.crown?.streak ?? 0
+  const resultWinner = sorted[0]
+  const zombieFailed = gameMode === 'zombie' && state.modeState?.baseHealth === 0
+  const resultIcon = zombieFailed ? '×' : gameMode === 'shoot' ? '◎' : gameMode === 'zombie' ? '▣' : gameMode === 'balloon' ? '◉' : gameMode === 'racing' ? '▰' : gameMode === 'treasure' ? '◆' : gameMode === 'crown' ? '♛' : '★'
+  const resultMission = gameMode === 'grab' ? '같은 단어를 가장 빠르게 선점한 플레이어' : gameMode === 'shoot' ? '움직이는 표적을 격추해 가장 높은 점수를 획득' : gameMode === 'zombie' ? zombieFailed ? '좀비가 기지에 도달해 방어선이 무너졌습니다' : '팀이 제한 시간 동안 마지막 키보드를 방어했습니다' : gameMode === 'balloon' ? '연쇄 풍선을 터뜨리고 폭탄을 피한 플레이어' : gameMode === 'racing' ? '타이핑 가속과 니트로로 결승선에 먼저 도착' : gameMode === 'treasure' ? '열쇠·지도·금고를 조합해 가장 많은 보물을 획득' : '왕관을 빼앗고 가장 오래 지켜낸 플레이어'
+  const resultMetric = gameMode === 'zombie' ? `${state.modeState?.teamKills ?? 0} ZAPS` : gameMode === 'racing' ? `${Math.round(state.modeState?.race?.[resultWinner?.id ?? '']?.distance ?? 0)}m` : gameMode === 'crown' ? `${((state.modeState?.crown?.heldMs[resultWinner?.id ?? ''] ?? 0) / 1000).toFixed(1)}s REIGN` : `${resultWinner?.score.toLocaleString() ?? 0} PTS`
   const visibleTargetEntries = state.targets.map((target, index) => ({ target, index })).filter(({ target }) => gameMode !== 'crown' || isSpectator || (target.kind === 'crown' ? !isCrownHolder : target.kind === 'guard' ? isCrownHolder : false))
   const nearestZombieSeconds = gameMode === 'zombie' ? Math.min(...state.targets.map(target => Math.max(0, ((target.expiresAt ?? Date.now()) - Date.now()) / 1000))) : Infinity
   const myRacer = state.modeState?.race?.[playerId] ?? { distance: 0, nitro: 0 }
@@ -483,10 +488,11 @@ function App() {
       {effect === 'shake' && <div className="interference shakefx"><b>SHAKE!</b></div>}
     </main>}
 
-    {screen === 'result' && <main className="result">
-      <p className="eyebrow">{isSpectator ? 'WATCH COMPLETE' : gameMode === 'zombie' && state.modeState?.baseHealth === 0 ? 'BASE DESTROYED' : 'GAME CLEAR'}</p><h1>{isSpectator ? 'NEXT ROUND?' : gameMode === 'zombie' ? state.modeState?.baseHealth === 0 ? 'DEFENSE FAILED!' : 'BASE SECURED!' : sorted[0]?.id === playerId ? 'YOU WIN!' : 'NICE TRY!'}</h1>
-      <div className="trophy">{gameMode === 'zombie' && state.modeState?.baseHealth === 0 ? '×' : '★'}</div><h2>{gameMode === 'zombie' ? `TEAM ZAPS ${state.modeState?.teamKills ?? 0}` : sorted[0]?.nickname}</h2><p className="final-score">{sorted[0]?.score.toLocaleString()} <small>PTS</small></p>
-      <section className="results-table">{sorted.map((p, i) => <div className={p.id === playerId ? 'mine' : ''} key={p.id}><strong>#{i + 1}</strong><span>{p.nickname}</span><b>{p.score.toLocaleString()}</b><em>{gameMode === 'crown' ? `CROWN ${((state.modeState?.crown?.heldMs[p.id] ?? 0) / 1000).toFixed(1)}s` : `MAX ×${p.combo}`}</em></div>)}</section>
+    {screen === 'result' && <main className={`result result-${gameMode} ${zombieFailed ? 'mission-failed' : ''}`}>
+      <p className="eyebrow">{isSpectator ? 'WATCH COMPLETE' : zombieFailed ? 'MISSION FAILED' : `${MODE_INFO[gameMode].badge} COMPLETE`}</p><h1>{isSpectator ? 'NEXT ROUND?' : gameMode === 'zombie' ? zombieFailed ? 'DEFENSE FAILED!' : 'BASE SECURED!' : resultWinner?.id === playerId ? 'YOU WIN!' : 'ROUND OVER!'}</h1>
+      <section className="result-spotlight"><div className="trophy">{resultIcon}</div><div><small>{zombieFailed ? 'FINAL REPORT' : gameMode === 'zombie' ? 'TEAM RESULT' : 'ROUND CHAMPION'}</small><h2>{gameMode === 'zombie' ? zombieFailed ? 'BASE LOST' : 'SURVIVORS' : resultWinner?.nickname}</h2><p className="final-score">{resultMetric}</p></div></section>
+      <p className="result-mission">{resultMission}</p>
+      <section className="results-table">{sorted.map((p, i) => <div className={`${p.id === playerId ? 'mine' : ''} ${i === 0 ? 'winner' : ''}`} key={p.id}><strong>#{i + 1}</strong><span>{p.nickname}</span><b>{gameMode === 'racing' ? `${Math.round(state.modeState?.race?.[p.id]?.distance ?? 0)}m` : p.score.toLocaleString()}</b><em>{gameMode === 'crown' ? `REIGN ${((state.modeState?.crown?.heldMs[p.id] ?? 0) / 1000).toFixed(1)}s` : gameMode === 'treasure' ? `KEY ${state.modeState?.treasure?.[p.id]?.keys ?? 0} · MAP ${(state.modeState?.treasure?.[p.id]?.maps ?? 0) % 3}/3` : gameMode === 'racing' ? `NITRO ${Math.round(state.modeState?.race?.[p.id]?.nitro ?? 0)}%` : `COMBO ×${p.combo}`}</em></div>)}</section>
       <div className="result-actions">{demo || state.hostId === playerId ? <><button className="primary" onClick={startGame}>한 판 더!</button><button className="ghost" onClick={returnToLobby}>대기실로</button></> : <><div className="waiting-host" role="status">방장의 선택을 기다리는 중…</div><button className="ghost" onClick={exitRoom}>나가기</button></>}</div>
     </main>}
     {toast && <div className={`toast ${toast.tone}`}>{toast.text}</div>}
