@@ -321,3 +321,48 @@ body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden}
 /* Keep the game answer visually identical when iOS treats it as a search field. */
 .type-form input[type="search"]{-webkit-appearance:none;appearance:none}
 .type-form input[type="search"]::-webkit-search-cancel-button,.type-form input[type="search"]::-webkit-search-decoration{-webkit-appearance:none;display:none}
+
+/* Nitro racing HUD: live position, moving asphalt and final-stretch tension. */
+.race-track{position:relative;padding-top:18px;border-color:#4f577b;background:linear-gradient(180deg,#111a32,#080814);box-shadow:inset 0 0 35px #03020a,0 0 18px #2ce8ff10}
+.race-track:before{content:"LIVE RACE · 100m CIRCUIT";position:absolute;left:9px;top:6px;font-family:'Press Start 2P';font-size:5px;color:#71819e}
+.race-lane{position:relative;padding:3px 4px;border:1px solid transparent;transition:border-color .2s,background .2s}
+.race-lane>b{display:flex;align-items:center;gap:6px}
+.race-lane>b i{width:17px;height:17px;flex:0 0 17px;display:grid;place-items:center;border:1px solid #615775;background:#151126;color:#a99db7;font-family:'Press Start 2P';font-size:5px;font-style:normal}
+.race-lane.leader{border-color:#ffe34255;background:linear-gradient(90deg,#ffe34210,transparent)}
+.race-lane.leader>b i{border-color:#ffe342;background:#574613;color:#fff59b;box-shadow:0 0 10px #ffe34255}
+.race-lane.mine{border-color:#2ce8ff44;background:linear-gradient(90deg,#2ce8ff0f,transparent)}
+.road{background-size:31px 100%;animation:road-flow .62s linear infinite}
+.race-lane:nth-child(2n) .road{animation-duration:.74s}
+.race-lane.near-finish .road{border-right-color:#ffe342;box-shadow:inset -20px 0 18px #ffe34218,inset 0 4px 0 #120f1b,inset 0 -4px 0 #090711}
+.race-lane.near-finish .road>em{color:#ffe342;animation:finish-flash .45s steps(2,end) infinite}
+.race-lane.nitro-hot .nitro-meter{border-color:#ffe342;color:#fff49a;box-shadow:0 0 12px #ffe34255;animation:nitro-meter-hot .55s steps(2,end) infinite}
+.race-lane.nitro-hot .race-car:after{width:21px;left:-23px;background:linear-gradient(90deg,transparent,#fff,#2ce8ff);box-shadow:-18px 4px 0 #ffe34266,-12px -4px 0 #2ce8ff99}
+.race-radio{min-height:29px;margin:-4px 0 5px;padding:5px 8px;display:flex;align-items:center;justify-content:space-between;border:1px solid #354961;background:linear-gradient(90deg,#0c2431,#111024);font-family:'Press Start 2P';font-size:6px;color:#7eeeff}
+.race-radio span{font-size:5px;color:#8e91a8}.race-radio.leading{border-color:#ffe342;color:#fff17a;background:linear-gradient(90deg,#3a3010,#151027)}.race-radio.final-lap{border-color:#ff516b;color:#ff8496;box-shadow:inset 0 0 17px #ff3a5418;animation:final-radio .6s steps(2,end) infinite}.race-radio.final-lap span{color:#ffe342}
+.racing-targets .race-target{overflow:hidden;transition:filter .15s,border-color .15s,box-shadow .15s}.racing-targets .race-target:after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;opacity:.75}.racing-targets .race-speed:after{background:repeating-linear-gradient(90deg,#2ce8ff 0 16px,transparent 17px 24px)}.racing-targets .race-corner:after{background:repeating-linear-gradient(90deg,#ff9a52 0 8px,#44203c 9px 16px)}.racing-targets .race-nitro:after{background:linear-gradient(90deg,#ffe342,#fff,#ff7b32,#ffe342);background-size:200% 100%;animation:nitro-strip .8s linear infinite}.racing-targets .race-target.matching{z-index:3;border-color:#fff;filter:brightness(1.24);box-shadow:0 0 24px #fff8b0,3px 4px 0 #080516}.racing-targets .race-nitro.matching{box-shadow:0 0 30px #ffe342,3px 4px 0 #080516}
+.race-track.finish-alert:after{content:"FINAL STRETCH";position:absolute;right:8px;top:6px;font-family:'Press Start 2P';font-size:5px;color:#ff667d;animation:finish-flash .5s steps(2,end) infinite}
+@keyframes road-flow{to{background-position:-31px 0}}@keyframes finish-flash{50%{opacity:.35}}@keyframes nitro-meter-hot{50%{filter:brightness(1.45)}}@keyframes final-radio{50%{background:#351324}}@keyframes nitro-strip{to{background-position:200% 0}}
+.reduced .road,.reduced .race-radio,.reduced .nitro-meter,.reduced .racing-targets .race-target:after{animation:none!important}
+
+@media(max-width:850px){
+  .race-track{padding:17px 5px 5px}
+  .race-track:before{left:6px;top:5px;font-size:4px}
+  .race-track.finish-alert:after{right:6px;top:5px;font-size:4px}
+  .race-lane{padding:2px}
+  .race-lane>b{gap:3px}
+  .race-lane>b i{width:14px;height:14px;flex-basis:14px;font-size:4px}
+  .race-radio{min-height:25px;font-size:5px}.race-radio span{font-size:4px}
+  .racing-targets .race-target.long-target strong{font-size:11px;line-height:1.1}
+  .racing-targets .race-target.very-long-target strong{font-size:9px;line-height:1.08}
+  .keyboard-open .race-track{padding:12px 3px 3px}
+  .keyboard-open .race-track:before,.keyboard-open .race-track:after{top:3px;font-size:3px}
+  .keyboard-open .race-lane{grid-template-columns:48px minmax(70px,1fr) 29px 58px;min-height:21px;padding:1px 2px}
+  .keyboard-open .race-lane>b{font-size:5px}.keyboard-open .race-lane>b i{width:11px;height:11px;flex-basis:11px;font-size:3px}
+  .keyboard-open .race-radio{display:none}
+  .keyboard-open .racing-targets{height:calc(100% - 52px)}
+  .keyboard-open .racing-targets .race-target{border-width:2px}
+  .keyboard-open .racing-targets .race-target strong{max-width:100%;font-size:12px;line-height:1.05;text-align:center;white-space:normal;word-break:keep-all}
+  .keyboard-open .racing-targets .race-target.long-target strong{font-size:10px}
+  .keyboard-open .racing-targets .race-target.very-long-target strong{font-size:9px}
+  .keyboard-open .racing-targets .race-target:after{height:3px}
+}
